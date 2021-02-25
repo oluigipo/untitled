@@ -1,0 +1,1 @@
+set LIB=-Llib -Iinclude -lglfw3 -lgdi32 -lopengl32 -lcglm
