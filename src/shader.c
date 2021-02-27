@@ -85,3 +85,14 @@ void shader_unload(Shader shd) {
 	glDeleteProgram(shd);
 }
 
+void shader_bind(Shader shd) {
+	assert(game.shaderStackSize < sizeof(game.shaderStack) / sizeof(*game.shaderStack));
+	game.shaderStack[game.shaderStackSize++] = shd;
+	glUseProgram(shd);
+}
+
+void shader_unbind(void) {
+	assert(game.shaderStackSize-- > 1);
+	glUseProgram(game.shaderStack[game.shaderStackSize-1]);
+}
+

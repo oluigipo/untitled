@@ -47,6 +47,8 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.window.height = (uint)height;
 	game.targetFPS = args->fps;
 	game.frameRate = 1000000 / args->fps;
+	game.framebufferStackSize = 1;
+	game.shaderStackSize = 1;
 	
 	// Init some other things
 	input_init();

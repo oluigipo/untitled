@@ -1,12 +1,22 @@
 // Textures Paths
-const char* const assets_textures_names[] = {
-#define _(name, path) path
+struct TextureLoadInfo {
+	const char* restrict path;
+	vec2 texarrayDim; // width + height
+};
+
+struct Texture {
+	uint width, height;
+	uint id;
+};
+
+const struct TextureLoadInfo assets_textures_info[] = {
+#define _(name, ...) { __VA_ARGS__ },
 #include "texture_list.h"
 #undef _
 };
 
 // Textures Names
-#define _(name, path) TEX_##name
+#define _(name, ...) TEX_##name,
 enum {
 #include "texture_list.h"
 	TEXTURE_COUNT
@@ -20,27 +30,59 @@ void texture_load_assets(void) {
 	
 	uint* texture = assets_textures;
 	uint* const end = assets_textures + TEXTURE_COUNT;
-	const char* const* names = assets_textures_names;
+	const struct TextureLoadInfo* info = assets_textures_info;
 	
-	for (; texture != end; ++texture, ++names) {
+	for (; texture != end; ++texture, ++info) {
 		int width, height, c;
 		
-		u8* data = stbi_load(*names, &width, &height, &c, 4);
+		u8* data = stbi_load(info->path, &width, &height, &c, 4);
 		if (!data) {
-			printf("Failed to load texture '%s', index %zu\n", *names, (usize)(texture - assets_textures) / sizeof(uint));
+			printf("Failed to load texture '%s', index %zu\n", info->path, (usize)(texture - assets_textures) / sizeof(uint));
 			
 			continue;
 		}
 		
-		glBindTexture(GL_TEXTURE_2D, *texture);
-		
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		// The field 'texarrayDim' will be 0 if it wasn't emmited in the initializer.
+		// Only checking the width (index 0) is enough.
+		if (info->texarrayDim[0] != 0) {
+			glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
+			
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			
+			uint subwidth = width / (uint)info->texarrayDim[0];
+			uint subheight = height / (uint)info->texarrayDim[1];
+			uint depth = subwidth * subheight;
+			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, info->texarrayDim[0], info->texarrayDim[1], depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, height);
+			
+			for (uint y = 0; y < subheight; ++y) {
+				for (uint x = 0; x < subwidth; ++x) {
+					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
+									0, 0, (subwidth * (subheight - y - 1) + x),
+									info->texarrayDim[0], info->texarrayDim[1], 1,
+									GL_RGBA, GL_UNSIGNED_BYTE,
+									data + ((y * subheight * width + x * subwidth) * 4));
+				}
+			}
+			
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+		} else {
+			glBindTexture(GL_TEXTURE_2D, *texture);
+			
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
 		
 		free(data);
 	}

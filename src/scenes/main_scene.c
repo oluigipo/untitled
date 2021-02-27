@@ -15,12 +15,12 @@ uint scene_main(void) {
 	
 	f32 vertices[] = {
 		// positions           color                texcoords
-		0.0f, 1.0f, 0.0f,      1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,      0.0f, 1.0f, 0.0f,    1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,      0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
-		1.0f, 0.0f, 0.0f,      0.0f, 1.0f, 0.0f,    1.0f, 1.0f,
-		0.0f, 0.0f, 0.0f,      1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f,      0.0f, 0.0f, 1.0f,    0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,    0.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,    1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,    1.0f, 1.0f,
+		1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,    1.0f, 1.0f,
+		0.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,    0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,    0.0f, 0.0f,
 	};
 	
 	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
@@ -37,6 +37,15 @@ uint scene_main(void) {
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(f32) * 8, (void*)(sizeof(f32) * 6));
 	
+	struct Texture text;
+	string str = strlit("Hello, World!");
+	if (0 != text_render(&text, str, assets_textures_info[TEX_DEFAULT_FONT].texarrayDim, assets_textures[TEX_DEFAULT_FONT])) {
+		printf("Failed.\n");
+		exit(1);
+	}
+	
+	printf("%i, %i, %i\n", text.width, text.height, text.id);
+	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
 		engine_begin_frame();
@@ -51,19 +60,35 @@ uint scene_main(void) {
 		glm_translate(object, (vec3) { -0.5f, -0.5f });
 		
 		// Draw
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, assets_textures[TEX_DEFAULT_FONT]);
+		// Draw walle
+		glBindVertexArray(vao);
 		
-		glUseProgram(shader);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, assets_textures[TEX_WALLE]);
+		
+		shader_bind(shader);
 		
 		glUniform1i(uniformTex, 0);
 		glUniformMatrix4fv(uniformProj, 1, false, (f32*)game.projection);
 		glUniformMatrix4fv(uniformObj, 1, false, (f32*)object);
 		
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		
+		// Draw text
+		glm_mat4_identity(object);
+		glm_translate(object, (vec3) { game.window.width / 2, game.window.height / 2 });
+		glm_scale(object, (vec3) { text.width * 5.0f, text.height * 5.0f });
+		glm_translate(object, (vec3) { -0.5f, -0.5f });
+		
+		glBindTexture(GL_TEXTURE_2D, text.id);
+		glUniformMatrix4fv(uniformObj, 1, false, (f32*)object);
+		
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		
+		shader_unbind();
 		
 		engine_end_frame();
 	}

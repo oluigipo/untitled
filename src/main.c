@@ -34,6 +34,12 @@ struct GameGlobalState {
 	
 	// Screen
 	mat4 projection;
+	
+	// Global stacks
+	uint framebufferStack[16]; // The first index should always be 0.
+	uint framebufferStackSize; // The stack will init at 1.
+	uint shaderStack[16]; //     /\ Same for all stacks.
+	uint shaderStackSize;
 } game = { 0 };
 
 struct GameArgs {
@@ -46,6 +52,7 @@ struct GameArgs {
 #include "shader.c"
 #include "texture.c"
 #include "random.c"
+#include "text.c"
 
 #include "engine.c"
 
