@@ -3,15 +3,18 @@
 struct TextVertexInfo {
 	vec2 offset;
 	vec3 color;
+	f32 chr;
 };
 
 uint text_render(struct Texture* restrict output, string text, const vec2u dim, u32 font) {
 	static Shader shader = 0;
 	static Uniform uniformFit;
 	static Uniform uniformTexture;
+	static Uniform uniformProj;
 	
 	static void* heapBuffer;
 	static usize heapSize;
+	static mat4 proj;
 	
 	if (!shader) {
 		shader = shader_load("res/text");
@@ -20,16 +23,20 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 			return 1;
 		}
 		
-		uniformFit = glGetUniformLocation(shader, "uFit");
-		uniformTexture = glGetUniformLocation(shader, "uTexture");
+		uniformFit = shader_uniform(shader, "uFit");
+		uniformTexture = shader_uniform(shader, "uTexture");
+		uniformProj = shader_uniform(shader, "uProjection");
+		
+		glm_mat4_identity(proj);
+		glm_ortho(0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, proj);
 	}
 	
 	uint texture;
 	
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	
 	// Allocate vertex buffer
 	uint vbo;
@@ -67,6 +74,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 		
 		if (text.ptr[i] == '\n') {
 			++y;
+			infos[i].chr = (f32)' ';
 			
 			if (x > xRecord)
 				xRecord = x;
@@ -75,6 +83,8 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 			
 			continue;
 		}
+		
+		infos[i].chr = (f32)text.ptr[i];
 		
 		++x;
 	}
@@ -94,10 +104,9 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 		1.0f, 1.0f
 	};
 	
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen + text.len, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen, NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof vertices, vertices);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), bufferLen, infos);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen, text.len, text.ptr);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof vertices , bufferLen, infos);
 	
 	uint vao;
 	glGenVertexArrays(1, &vao);
@@ -119,7 +128,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	
 	// chars
 	glEnableVertexAttribArray(3);
-	glVertexAttribIPointer(3, 1, GL_UNSIGNED_BYTE, 1, (void*)(sizeof(vertices) + bufferLen));
+	glVertexAttribPointer(3, 1, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof(vec2) + sizeof(vec3) + sizeof(vertices)));
 	glVertexAttribDivisor(3, 1);
 	
 	// Create Framebuffer
@@ -139,18 +148,59 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 		goto __exit;
 	}
 	
+	// Fit
+	mat4 fit;
+	
+	glm_mat4_identity(fit);
+	glm_scale(fit, (vec3) { 1.0f / xRecord, 1.0f / (y + 1) });
+	
 	// Render text to framebuffer
 	glClearColor(0.0f, 0.2f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, font);
 	
 	shader_bind(shader);
-	glUniform1i(uniformTexture, 0);
-	glUniform2f(uniformFit, 1.0f / xRecord, 1.0f / (y + 1));
+	glUniform1i(uniformTexture, 1);
+	glUniformMatrix4fv(uniformFit, 1, false, (f32*)fit);
+	glUniformMatrix4fv(uniformProj, 1, false, (f32*)proj);
 	
 	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, text.len);
+	
+	// THIS DOESN'T WORK!!!!!!!
+	{
+		f32 v[] = {
+			0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		};
+		
+		uint vaoo;
+		glGenVertexArrays(1, &vaoo);
+		glBindVertexArray(vaoo);
+		
+		uint vboo;
+		glGenBuffers(1, &vboo);
+		glBindBuffer(GL_ARRAY_BUFFER, vboo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof v, v, GL_STATIC_DRAW);
+		
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(f32) * 6, (void*)0);
+		
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(f32) * 6, (void*)(sizeof(f32) * 3));
+		
+		Shader shd = shader_load("res/testing");
+		Uniform uu = shader_uniform(shd, "uProj");
+		
+		shader_bind(shd);
+		glUniformMatrix4fv(uu, 1, false, (f32*)proj);
+		
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		
+		shader_unbind();
+	}
 	
 	// Finish
 	output->id = texture;

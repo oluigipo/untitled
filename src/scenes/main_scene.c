@@ -38,7 +38,7 @@ uint scene_main(void) {
 	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(f32) * 8, (void*)(sizeof(f32) * 6));
 	
 	struct Texture text;
-	string str = strlit("Hello, World!");
+	string str = strlit("\x08Hello, World!");
 	if (0 != text_render(&text, str, assets_textures_info[TEX_DEFAULT_FONT].tileSize, assets_textures[TEX_DEFAULT_FONT])) {
 		printf("Failed.\n");
 		exit(1);
