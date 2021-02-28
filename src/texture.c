@@ -1,11 +1,16 @@
 // Textures Paths
 struct TextureLoadInfo {
 	const char* restrict path;
-	vec2 texarrayDim; // width + height
+	union ____ {
+		struct ___ {
+			uint tileWidth, tileHeight;
+		};
+		vec2u tileSize;
+	};
 };
 
 struct Texture {
-	uint width, height;
+	uint width, height, depth;
 	uint id;
 };
 
@@ -43,8 +48,8 @@ void texture_load_assets(void) {
 		}
 		
 		// The field 'texarrayDim' will be 0 if it wasn't emmited in the initializer.
-		// Only checking the width (index 0) is enough.
-		if (info->texarrayDim[0] != 0) {
+		// Only checking the width is enough.
+		if (info->tileWidth != 0) {
 			glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
 			
 			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
@@ -52,10 +57,10 @@ void texture_load_assets(void) {
 			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			
-			uint subwidth = width / (uint)info->texarrayDim[0];
-			uint subheight = height / (uint)info->texarrayDim[1];
+			uint subwidth = width / info->tileWidth;
+			uint subheight = height / info->tileHeight;
 			uint depth = subwidth * subheight;
-			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, info->texarrayDim[0], info->texarrayDim[1], depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+			glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, info->tileWidth, info->tileHeight, depth, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 			
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, height);
@@ -65,9 +70,9 @@ void texture_load_assets(void) {
 					// printf("p: %u, %u\n", x, y);
 					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
 									0, 0, x + subwidth * (subheight - y - 1),
-									(uint)info->texarrayDim[0], (uint)info->texarrayDim[1], 1,
+									info->tileWidth, info->tileHeight, 1,
 									GL_RGBA, GL_UNSIGNED_BYTE,
-									data + ((y * (uint)info->texarrayDim[1] * width + x * (uint)info->texarrayDim[0]) * 4));
+									data + ((y * info->tileHeight * width + x * info->tileWidth) * 4));
 				}
 			}
 			
@@ -91,5 +96,9 @@ void texture_load_assets(void) {
 
 void texture_free_assets(void) {
 	glDeleteTextures(TEXTURE_COUNT, assets_textures);
+}
+
+void texture_free(struct Texture* restrict texture) {
+	glDeleteTextures(1, &texture->id);
 }
 

@@ -5,7 +5,7 @@ struct TextVertexInfo {
 	vec3 color;
 };
 
-uint text_render(struct Texture* restrict output, string text, const vec2 dim, u32 font) {
+uint text_render(struct Texture* restrict output, string text, const vec2u dim, u32 font) {
 	static Shader shader = 0;
 	static Uniform uniformFit;
 	static Uniform uniformTexture;
@@ -95,6 +95,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2 dim, u
 	};
 	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen + text.len, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof vertices, vertices);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), bufferLen, infos);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen, text.len, text.ptr);
 	
@@ -155,6 +156,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2 dim, u
 	output->id = texture;
 	output->width = width;
 	output->height = height;
+	output->depth = 0;
 	
 	__exit:;
 	glDeleteBuffers(1, &vbo);

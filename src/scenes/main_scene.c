@@ -39,7 +39,7 @@ uint scene_main(void) {
 	
 	struct Texture text;
 	string str = strlit("Hello, World!");
-	if (0 != text_render(&text, str, assets_textures_info[TEX_DEFAULT_FONT].texarrayDim, assets_textures[TEX_DEFAULT_FONT])) {
+	if (0 != text_render(&text, str, assets_textures_info[TEX_DEFAULT_FONT].tileSize, assets_textures[TEX_DEFAULT_FONT])) {
 		printf("Failed.\n");
 		exit(1);
 	}

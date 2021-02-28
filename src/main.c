@@ -46,6 +46,8 @@ struct GameArgs {
 	uint fps;
 };
 
+typedef uint vec2u[2];
+
 // Game Core
 #include "input.c"
 #include "file.c"
