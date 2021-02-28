@@ -6,16 +6,14 @@ struct TextVertexInfo {
 };
 
 uint text_render(struct Texture* restrict output, string text, const vec2 dim, u32 font) {
-	static uint vao = 0;
-	static uint staticVbo;
-	static Shader shader;
+	static Shader shader = 0;
 	static Uniform uniformFit;
 	static Uniform uniformTexture;
 	
 	static void* heapBuffer;
 	static usize heapSize;
 	
-	if (!vao) {
+	if (!shader) {
 		shader = shader_load("res/text");
 		if (!shader) {
 			printf("Could not load text shader.\n");
@@ -24,34 +22,6 @@ uint text_render(struct Texture* restrict output, string text, const vec2 dim, u
 		
 		uniformFit = glGetUniformLocation(shader, "uFit");
 		uniformTexture = glGetUniformLocation(shader, "uTexture");
-		
-		f32 vertices[] = {
-			0.0f, 0.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			1.0f, 0.0f, 1.0f, 1.0f,
-			1.0f, 0.0f, 1.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 1.0f, 0.0f
-		};
-		
-		glGenBuffers(1, &staticVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, staticVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
-		
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-		
-		// position
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(f32) * 4, 0);
-		
-		// texcoords
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(f32) * 4, (void*)(sizeof(f32) * 2));
-		
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	} else {
-		glBindVertexArray(vao);
 	}
 	
 	uint texture;
@@ -115,21 +85,41 @@ uint text_render(struct Texture* restrict output, string text, const vec2 dim, u
 	width = xRecord * dim[0];
 	height = (y + 1) * dim[1];
 	
-	glBufferData(GL_ARRAY_BUFFER, bufferLen + text.len, NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, bufferLen, infos);
-	glBufferSubData(GL_ARRAY_BUFFER, bufferLen, text.len, text.ptr);
+	f32 vertices[] = {
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 1.0f
+	};
 	
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen + text.len, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), bufferLen, infos);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen, text.len, text.ptr);
+	
+	uint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	
+	// position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(f32) * 2, 0);
+	
+	// offset
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof vertices));
+	glVertexAttribDivisor(1, 1);
+	
+	// color
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)0);
+	glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof(vec2) + sizeof(vertices)));
 	glVertexAttribDivisor(2, 1);
 	
+	// chars
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)sizeof(vec2));
+	glVertexAttribIPointer(3, 1, GL_UNSIGNED_BYTE, 1, (void*)(sizeof(vertices) + bufferLen));
 	glVertexAttribDivisor(3, 1);
-	
-	glEnableVertexAttribArray(4);
-	glVertexAttribIPointer(4, 1, GL_UNSIGNED_BYTE, 1, (void*)bufferLen);
-	glVertexAttribDivisor(4, 1);
 	
 	// Create Framebuffer
 	uint framebuffer;
@@ -149,7 +139,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2 dim, u
 	}
 	
 	// Render text to framebuffer
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.2f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	glActiveTexture(GL_TEXTURE0);
@@ -169,6 +159,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2 dim, u
 	__exit:;
 	glDeleteBuffers(1, &vbo);
 	glDeleteFramebuffers(1, &framebuffer);
+	glDeleteVertexArrays(1, &vao);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, game.framebufferStack[game.framebufferStackSize-1]);
 	shader_unbind();

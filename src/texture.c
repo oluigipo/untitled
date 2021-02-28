@@ -60,13 +60,14 @@ void texture_load_assets(void) {
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, height);
 			
-			for (uint y = 0; y < subheight; ++y) {
+			for (int y = 0; y < subheight; ++y) {
 				for (uint x = 0; x < subwidth; ++x) {
+					// printf("p: %u, %u\n", x, y);
 					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
-									0, 0, (subwidth * (subheight - y - 1) + x),
-									info->texarrayDim[0], info->texarrayDim[1], 1,
+									0, 0, x + subwidth * (subheight - y - 1),
+									(uint)info->texarrayDim[0], (uint)info->texarrayDim[1], 1,
 									GL_RGBA, GL_UNSIGNED_BYTE,
-									data + ((y * subheight * width + x * subwidth) * 4));
+									data + ((y * (uint)info->texarrayDim[1] * width + x * (uint)info->texarrayDim[0]) * 4));
 				}
 			}
 			
