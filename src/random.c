@@ -44,3 +44,25 @@ void random_init(void) {
 f64 random_f64(void) {
 	return (f64)random() / ULLONG_MAX;
 }
+
+// 32 bits version of random()
+u32 random_u32(void) {
+	u64 result = random();
+	return ((u32*)&result)[1]; // the higher bits are more random.
+}
+
+// Test the randomness of random_f64()
+void random_test(void) {
+	FILE* file = fopen("random_test.ppm", "w");
+	if (!file)
+		return;
+	
+	fprintf(file, "P3 256 256 255 ");
+	const uint total = 256*256*3;
+	for (uint i = 0; i < total; ++i) {
+		fprintf(file, "%i ", (int)(random_f64() * 256));
+	}
+	
+	fclose(file);
+}
+

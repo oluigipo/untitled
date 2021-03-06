@@ -106,7 +106,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen, NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof vertices, vertices);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof vertices , bufferLen, infos);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof vertices, bufferLen, infos);
 	
 	uint vao;
 	glGenVertexArrays(1, &vao);
@@ -156,19 +156,10 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	
 	// Render text to framebuffer
 	glClearColor(0.0f, 0.2f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, font);
-	
-	shader_bind(shader);
-	glUniform1i(uniformTexture, 1);
-	glUniformMatrix4fv(uniformFit, 1, false, (f32*)fit);
-	glUniformMatrix4fv(uniformProj, 1, false, (f32*)proj);
-	
-	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, text.len);
+	glClear(GL_COLOR_BUFFER_BIT); // This works
 	
 	// THIS DOESN'T WORK!!!!!!!
+	// Trying to draw a simple triangle, but it doesn't appear in the texture!
 	{
 		f32 v[] = {
 			0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -202,6 +193,17 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 		shader_unbind();
 	}
 	
+#if 0
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, font);
+	
+	shader_bind(shader);
+	glUniform1i(uniformTexture, 1);
+	glUniformMatrix4fv(uniformFit, 1, false, (f32*)fit);
+	glUniformMatrix4fv(uniformProj, 1, false, (f32*)proj);
+	
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, text.len);
+#endif
 	// Finish
 	output->id = texture;
 	output->width = width;
@@ -214,7 +216,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	glDeleteVertexArrays(1, &vao);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, game.framebufferStack[game.framebufferStackSize-1]);
-	shader_unbind();
+	// shader_unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	

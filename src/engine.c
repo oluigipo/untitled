@@ -56,6 +56,8 @@ uint engine_init(const struct GameArgs* restrict args) {
 	texture_load_assets();
 	random_init();
 	
+	random_test();
+	
 	// Initialize OpenGL things
 	glfwcallback_window_resize(window, width, height);
 	
