@@ -16,6 +16,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	static usize heapSize;
 	static mat4 proj;
 	
+	// Setup
 	if (!shader) {
 		shader = shader_load("res/text");
 		if (!shader) {
@@ -155,7 +156,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	glm_scale(fit, (vec3) { 1.0f / xRecord, 1.0f / (y + 1) });
 	
 	// Render text to framebuffer
-	glClearColor(0.0f, 0.2f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0.2f, 0.0f, 1.0f); // green-ish for testing
 	glClear(GL_COLOR_BUFFER_BIT); // This works
 	
 	// THIS DOESN'T WORK!!!!!!!
@@ -203,6 +204,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	glUniformMatrix4fv(uniformProj, 1, false, (f32*)proj);
 	
 	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, text.len);
+	shader_unbind();
 #endif
 	// Finish
 	output->id = texture;
@@ -216,7 +218,6 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	glDeleteVertexArrays(1, &vao);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, game.framebufferStack[game.framebufferStackSize-1]);
-	// shader_unbind();
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	
