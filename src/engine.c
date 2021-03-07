@@ -46,7 +46,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.window.width = (uint)width;
 	game.window.height = (uint)height;
 	game.targetFPS = args->fps;
-	game.frameRate = 1000000 / args->fps;
+	game.frameRate = 1000 / args->fps;
 	game.framebufferStackSize = 1;
 	game.shaderStackSize = 1;
 	
@@ -83,11 +83,11 @@ void engine_end_frame(void) {
 	glfwSwapBuffers(game.apiWindow);
 	
 	f64 frameEnd = glfwGetTime();
-	uint frameDuration = (uint)((frameEnd - game.frameBegin) * 1000000);
+	uint frameDuration = (uint)((frameEnd - game.frameBegin) * 1000);
 	
 	// V-Sync
 	if (game.frameRate > frameDuration) {
-		usleep(game.frameRate - frameDuration);
+		Sleep(game.frameRate - frameDuration);
 	}
 }
 

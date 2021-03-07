@@ -41,7 +41,6 @@ typedef size_t usize;
 typedef ptrdiff_t isize;
 
 // Let the compiler do it's job
-int usleep(uint);
 int printf(const char* restrict, ...);
 
 /// Structs
