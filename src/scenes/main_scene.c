@@ -38,8 +38,16 @@ uint scene_main(void) {
 	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(f32) * 8, (void*)(sizeof(f32) * 6));
 	
 	struct Texture text;
-	string str = strlit("\x08Hello, World!");
-	if (0 != text_render(&text, str, assets_textures_info[TEX_DEFAULT_FONT].tileSize, assets_textures[TEX_DEFAULT_FONT])) {
+	string str = strlit("Hello, World! \x01\nThis is a sample text.");
+	uint colorData[] = {
+		5, 0xFF0000,
+		8, 0x00FFFF,
+		0, 0xFFFFFF
+	};
+	
+	if (0 != text_render(&text, str, colorData,
+						 assets_textures_info[TEX_DEFAULT_FONT].tileSize,
+						 assets_textures[TEX_DEFAULT_FONT])) {
 		printf("Failed.\n");
 		exit(1);
 	}
@@ -60,7 +68,7 @@ uint scene_main(void) {
 		glm_translate(object, (vec3) { -0.5f, -0.5f });
 		
 		// Draw
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		// Draw walle

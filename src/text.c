@@ -6,7 +6,16 @@ struct TextVertexInfo {
 	f32 chr;
 };
 
-uint text_render(struct Texture* restrict output, string text, const vec2u dim, u32 font) {
+/*
+ * colorData is just a buffer that contains pairs of integers which are (count, color).
+* If 'count' is zero, it will affect all the remaining characters of the text.
+* 
+* The buffer should end with a pair that has a 'count' of 0 or the sum of all the pairs 'count'
+* should be '>= text.len'.
+*
+* also, colorData can be NULL. Then all the text will be white.
+*/
+uint text_render(struct Texture* restrict output, string text, const uint* restrict colorData, const vec2u dim, u32 font) {
 	static Shader shader = 0;
 	static Uniform uniformFit;
 	static Uniform uniformTexture;
@@ -65,13 +74,28 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	uint x = 0, y = 0;
 	uint xRecord = 0;
 	
+	uint count = 0;
+	uint color = 0xFFFFFF; // white
+	
+	if (colorData) {
+		count = colorData[0];
+		color = colorData[1];
+		colorData += 2;
+	}
+	
 	for (uint i = 0; i < text.len; ++i) {
 		infos[i].offset[0] = (f32)x;
 		infos[i].offset[1] = (f32)y;
 		
-		infos[i].color[0] = 1.0f;
-		infos[i].color[1] = 1.0f;
-		infos[i].color[2] = 1.0f;
+		infos[i].color[0] = (f32)((color >> 16) & 0xFF) / 255.0f;
+		infos[i].color[1] = (f32)((color >> 8) & 0xFF) / 255.0f;
+		infos[i].color[2] = (f32)(color & 0xFF) / 255.0f;
+		
+		if (count > 0 && --count == 0) {
+			count = colorData[0];
+			color = colorData[1];
+			colorData += 2;
+		}
 		
 		if (text.ptr[i] == '\n') {
 			++y;
@@ -149,63 +173,22 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 		goto __exit;
 	}
 	
-	// Fit
-	mat4 fit;
-	
-	glm_mat4_identity(fit);
-	glm_scale(fit, (vec3) { 1.0f / xRecord, 1.0f / (y + 1) });
-	
 	// Render text to framebuffer
-	glClearColor(0.0f, 0.2f, 0.0f, 1.0f); // green-ish for testing
-	glClear(GL_COLOR_BUFFER_BIT); // This works
+	glViewport(0.0f, 0.0f, width, height);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
 	
-	// THIS DOESN'T WORK!!!!!!!
-	// Trying to draw a simple triangle, but it doesn't appear in the texture!
-	{
-		f32 v[] = {
-			0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		};
-		
-		uint vaoo;
-		glGenVertexArrays(1, &vaoo);
-		glBindVertexArray(vaoo);
-		
-		uint vboo;
-		glGenBuffers(1, &vboo);
-		glBindBuffer(GL_ARRAY_BUFFER, vboo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof v, v, GL_STATIC_DRAW);
-		
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(f32) * 6, (void*)0);
-		
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(f32) * 6, (void*)(sizeof(f32) * 3));
-		
-		Shader shd = shader_load("res/testing");
-		Uniform uu = shader_uniform(shd, "uProj");
-		
-		shader_bind(shd);
-		glUniformMatrix4fv(uu, 1, false, (f32*)proj);
-		
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		
-		shader_unbind();
-	}
-	
-#if 0
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, font);
 	
 	shader_bind(shader);
-	glUniform1i(uniformTexture, 1);
-	glUniformMatrix4fv(uniformFit, 1, false, (f32*)fit);
+	glUniform1i(uniformTexture, 0);
+	glUniform2f(uniformFit, 1.0f / xRecord, 1.0f / (y + 1));
 	glUniformMatrix4fv(uniformProj, 1, false, (f32*)proj);
 	
 	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, text.len);
 	shader_unbind();
-#endif
+	
 	// Finish
 	output->id = texture;
 	output->width = width;
@@ -220,6 +203,7 @@ uint text_render(struct Texture* restrict output, string text, const vec2u dim, 
 	glBindFramebuffer(GL_FRAMEBUFFER, game.framebufferStack[game.framebufferStackSize-1]);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glViewport(0, 0, game.window.width, game.window.height);
 	
 	return result; // success
 }

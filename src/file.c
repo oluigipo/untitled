@@ -1,4 +1,4 @@
-usize file_read(const char* restrict fname, u8* buffer, usize buffSize) {
+usize file_read(const char* restrict fname, char* buffer, usize buffSize) {
 	FILE* file = fopen(fname, "r");
 	if (!file)
 		return 0;
