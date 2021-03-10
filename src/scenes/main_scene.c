@@ -45,12 +45,17 @@ uint scene_main(void) {
 		0, 0xFFFFFF
 	};
 	
+	//clock_t timer = clock();
+	
+	//for (uint i = 0; i < 5000 && (glDeleteTextures(1, &text.id), true); ++i)
 	if (0 != text_render(&text, str, colorData,
 						 assets_textures_info[TEX_DEFAULT_FONT].tileSize,
 						 assets_textures[TEX_DEFAULT_FONT])) {
 		printf("Failed.\n");
 		exit(1);
 	}
+	
+	//printf("Time: %i / %i\n", clock() - timer, CLOCKS_PER_SEC);
 	
 	printf("%i, %i, %i\n", text.width, text.height, text.id);
 	

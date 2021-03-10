@@ -1,15 +1,19 @@
+#define __CREATE_IMPL__
+#include "std.h"
+#include <time.h>
+#include "memory.c"
+
+#define STB_IMAGE_IMPLEMENTATION
+#ifdef DEBUG
+#define STBI_NO_SIMD
+#endif
+#define STBI_MALLOC mem_alloc
+#define STBI_REALLOC mem_realloc
+#define STBI_FREE mem_free
 #include "glad.c"
 #include <glfw3.h>
 #include <cglm/cglm.h>
-
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_NO_SIMD
 #include <stb_image.h>
-// #define STB_TRUETYPE_IMPLEMENTATION
-// #include <stb_truetype.h>
-
-#define __CREATE_IMPL__
-#include "std.h"
 
 typedef uint (*__scene_t)(void);
 typedef __scene_t Scene;
@@ -41,13 +45,18 @@ struct GameGlobalState {
 	uint framebufferStackSize; // The stack will init at 1.
 	uint shaderStack[16]; //     /\ Same for all stacks.
 	uint shaderStackSize;
+	
+	// Temporary Memory
+	struct Arena frameArena; // Temporary memory for things that should live an entire frame.
 } game = { 0 };
 
 struct GameArgs {
 	uint fps;
+	usize arena;
 };
 
 typedef uint vec2u[2];
+typedef int vec2i[2];
 
 // Game Core
 #include "input.c"
@@ -74,8 +83,9 @@ int main(int argc, char* argv[]) {
 		return result;
 	
 	game.currentScene = scene_main;
-	while (game.currentScene)
+	do {
 		result = game.currentScene();
+	} while (game.currentScene && !result);
 	
 	engine_deinit();
 	return result;
@@ -95,21 +105,42 @@ internal u64 hash_of(const char* restrict str) {
 internal void parse_args(struct GameArgs* restrict args, uint argc, const char* restrict* restrict argv) {
 	// Default values
 	args->fps = 60;
+	args->arena = 1024 * 1024;
 	
 	// Parse arguments
-	uint i = 1;
-	while (i < argc) {
+	for (uint i = 1; i < argc; ++i) {
 		const char* restrict arg = argv[i];
 		
 		// Argument shall begin with a -
 		if (arg[0] != '-') {
-			++i;
 			continue;
 		}
 		
 		u64 hash = hash_of(arg + 1); // ignore first character
 		
 		switch (hash) {
+			// arena
+			case 4533368378118350312ull: {
+				++i;
+				arg = argv[i];
+				if (!arg) {
+					printf("Missing value for argument '-arena'. Default to %zu.\n", args->arena);
+					
+					break;
+				}
+				
+				usize s;
+				sscanf(arg, "%zu", &s);
+				
+				if (s < args->arena) {
+					printf("Argument for '-arena' shall be greater than the default value %zu. Ignoring flag.\n", args->arena);
+					
+					break;
+				}
+				
+				args->arena = s;
+			} break;
+			
 			// fps
 			case 6524616317257075368ull: {
 				++i;
@@ -128,7 +159,5 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 				printf("Ignoring argument '%s'\n", arg);
 			} break;
 		}
-		
-		++i;
 	}
 }

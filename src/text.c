@@ -25,6 +25,18 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	static usize heapSize;
 	static mat4 proj;
 	
+	static uint vao;
+	static uint vbo;
+	
+	static f32 vertices[] = {
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 0.0f,
+		1.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 1.0f
+	};
+	
 	// Setup
 	if (!shader) {
 		shader = shader_load("res/text");
@@ -39,6 +51,34 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 		
 		glm_mat4_identity(proj);
 		glm_ortho(0.0f, 1.0f, 1.0f, 0.0f, -1.0f, 1.0f, proj);
+		
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		
+		// position
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(f32) * 2, 0);
+		
+		// offset
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof vertices));
+		glVertexAttribDivisor(1, 1);
+		
+		// color
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof(vec2) + sizeof(vertices)));
+		glVertexAttribDivisor(2, 1);
+		
+		// chars
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 1, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof(vec2) + sizeof(vec3) + sizeof(vertices)));
+		glVertexAttribDivisor(3, 1);
+	} else {
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBindVertexArray(vao);
 	}
 	
 	uint texture;
@@ -48,14 +88,10 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	
-	// Allocate vertex buffer
-	uint vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	
+	// Allocate vertex buffer data
 	usize bufferLen = text.len * sizeof(struct TextVertexInfo);
 	if (heapSize < bufferLen) {
-		void* newbuf = realloc(heapBuffer, bufferLen);
+		void* newbuf = mem_realloc(heapBuffer, bufferLen);
 		if (!newbuf) {
 			// panic
 			printf("Could not allocate memory!\nExiting.\n");
@@ -120,41 +156,9 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	width = xRecord * dim[0];
 	height = (y + 1) * dim[1];
 	
-	f32 vertices[] = {
-		0.0f, 0.0f,
-		0.0f, 1.0f,
-		1.0f, 0.0f,
-		1.0f, 0.0f,
-		0.0f, 1.0f,
-		1.0f, 1.0f
-	};
-	
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen, NULL, GL_DYNAMIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof vertices, vertices);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof vertices, bufferLen, infos);
-	
-	uint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	
-	// position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(f32) * 2, 0);
-	
-	// offset
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof vertices));
-	glVertexAttribDivisor(1, 1);
-	
-	// color
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof(vec2) + sizeof(vertices)));
-	glVertexAttribDivisor(2, 1);
-	
-	// chars
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 1, GL_FLOAT, false, sizeof(struct TextVertexInfo), (void*)(sizeof(vec2) + sizeof(vec3) + sizeof(vertices)));
-	glVertexAttribDivisor(3, 1);
 	
 	// Create Framebuffer
 	uint framebuffer;

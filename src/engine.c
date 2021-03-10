@@ -51,6 +51,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.shaderStackSize = 1;
 	
 	// Init some other things
+	arena_init(&game.frameArena, args->arena);
 	input_init();
 	stbi_set_flip_vertically_on_load(true);
 	texture_load_assets();
@@ -80,6 +81,7 @@ void engine_begin_frame(void) {
 
 void engine_end_frame(void) {
 	++game.frameCount;
+	arena_clear(&game.frameArena);
 	glfwSwapBuffers(game.apiWindow);
 	
 	f64 frameEnd = glfwGetTime();
