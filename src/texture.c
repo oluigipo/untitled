@@ -1,6 +1,7 @@
 // Textures Paths
 struct TextureLoadInfo {
 	const char* restrict path;
+	
 	union ____ {
 		struct ___ {
 			uint tileWidth, tileHeight;
@@ -90,7 +91,7 @@ void texture_load_assets(void) {
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 		
-		free(data);
+		mem_free(data);
 	}
 }
 

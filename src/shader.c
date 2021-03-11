@@ -13,7 +13,7 @@ Shader shader_load(const char* restrict name) {
 	sprintf(path, "%s.vs", name);
 	len = file_read(path, source, sizeof source);
 	if (len == sizeof(source) - 1) {
-		printf("File is too long... '%s'\n", path);
+		debug_error("File is too long... '%s'\n", path);
 		return 0;
 	}
 	
@@ -26,7 +26,7 @@ Shader shader_load(const char* restrict name) {
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(vertexShader, sizeof info, NULL, info);
-		printf("Vertex Shader Compilation Error: '%s'\n==========================\n%s\n", path, info);
+		debug_error("Vertex Shader Compilation Error: '%s'\n==========================\n%s\n", path, info);
 		glDeleteShader(vertexShader);
 		return 0;
 	}
@@ -35,7 +35,7 @@ Shader shader_load(const char* restrict name) {
 	sprintf(path, "%s.fs", name);
 	len = file_read(path, source, sizeof source);
 	if (len == sizeof(source) - 1) {
-		printf("File is too long... '%s'\n", path);
+		debug_error("File is too long... '%s'\n", path);
 		glDeleteShader(vertexShader);
 		return 0;
 	}
@@ -49,7 +49,7 @@ Shader shader_load(const char* restrict name) {
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(fragmentShader, sizeof info, NULL, info);
-		printf("Fragment Shader Compilation Error: '%s'\n==========================\n%s\n", path, info);
+		debug_error("Fragment Shader Compilation Error: '%s'\n==========================\n%s\n", path, info);
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 		return 0;
@@ -92,7 +92,7 @@ void shader_bind(Shader shd) {
 }
 
 void shader_unbind(void) {
-	assert(game.shaderStackSize-- > 1);
-	glUseProgram(game.shaderStack[game.shaderStackSize-1]);
+	assert(game.shaderStackSize > 1);
+	glUseProgram(game.shaderStack[--game.shaderStackSize - 1]);
 }
 

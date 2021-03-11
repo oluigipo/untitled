@@ -52,7 +52,7 @@ uint scene_main(void) {
 		exit(1);
 	}
 	
-	printf("%i, %i, %i\n", text.width, text.height, text.id);
+	debug_print("%i, %i, %i\n", text.width, text.height, text.id);
 	
 	f32 angle = 0.0f;
 	
@@ -64,7 +64,8 @@ uint scene_main(void) {
 		if (keyboard_is_pressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
-		angle += 0.05f;
+		debug_print("%f\n", game.deltaTime);
+		angle += 0.05f * game.deltaTime;
 		
 		glm_mat4_identity(object);
 		glm_translate(object, (vec3) { mouse.pos[0], mouse.pos[1] });

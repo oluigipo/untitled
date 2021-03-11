@@ -18,10 +18,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwSwapInterval(0);
 	
-	int width = 1280;
-	int height = 720;
-	
-	GLFWwindow* window = glfwCreateWindow(width, height, "game", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(args->width, args->height, "game", NULL, NULL);
 	if (!window) {
 		printf("Couldn't initialize window.\nExiting.");
 		glfwTerminate();
@@ -32,7 +29,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	glfwSetWindowPos(window, mode->width / 2 - width / 2, mode->height / 2 - height / 2);
+	glfwSetWindowPos(window, mode->width / 2 - args->width / 2, mode->height / 2 - args->height / 2);
 	
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		printf("Could not load OpenGL functions.\nExiting.");
@@ -43,8 +40,8 @@ uint engine_init(const struct GameArgs* restrict args) {
 	glfwSetWindowSizeCallback(window, glfwcallback_window_resize);
 	
 	game.apiWindow = window;
-	game.window.width = (uint)width;
-	game.window.height = (uint)height;
+	game.window.width = args->width;
+	game.window.height = args->height;
 	game.targetFPS = args->fps;
 	game.frameRate = 1000 / args->fps;
 	game.framebufferStackSize = 1;
@@ -57,10 +54,10 @@ uint engine_init(const struct GameArgs* restrict args) {
 	texture_load_assets();
 	random_init();
 	
-	random_test();
+	//debug(random_test());
 	
 	// Initialize OpenGL things
-	glfwcallback_window_resize(window, width, height);
+	glfwcallback_window_resize(window, args->width, args->height);
 	
 	glEnable(GL_BLEND);
 	// glEnable(GL_CULL_FACE);
@@ -72,7 +69,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 
 void engine_begin_frame(void) {
 	game.frameBegin = glfwGetTime();
-	game.deltaTime = (f32)((game.frameBegin - game.lastFrame) * game.targetFPS);
+	game.deltaTime = (f32)((game.frameBegin - game.lastFrame) * FPS_DEFAULT);
 	
 	// NOTE(luigi): glfwPollEvents(void) is inside input_update(void).
 	//              mouse input is 1 frame behind VS oldKeys not working.
@@ -86,6 +83,8 @@ void engine_end_frame(void) {
 	
 	f64 frameEnd = glfwGetTime();
 	uint frameDuration = (uint)((frameEnd - game.frameBegin) * 1000);
+	
+	game.lastFrame = frameEnd;
 	
 	// V-Sync
 	if (game.frameRate > frameDuration) {

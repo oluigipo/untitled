@@ -1,8 +1,6 @@
+// Includes
 #define __CREATE_IMPL__
 #include "std.h"
-#include <time.h>
-#include "memory.c"
-#include "debug.c"
 
 #define STB_IMAGE_IMPLEMENTATION
 #ifdef TCC
@@ -15,6 +13,9 @@
 #include <glfw3.h>
 #include <cglm/cglm.h>
 #include <stb_image.h>
+
+//~ Actual Stuff
+#define FPS_DEFAULT 60
 
 typedef uint (*__scene_t)(void);
 typedef __scene_t Scene;
@@ -52,8 +53,11 @@ struct GameGlobalState {
 } game = { 0 };
 
 struct GameArgs {
-	uint fps;
 	usize arena;
+	uint fps;
+	uint width;
+	uint height;
+	b8 fullscreen;
 };
 
 typedef uint vec2u[2];
@@ -105,8 +109,11 @@ internal u64 hash_of(const char* restrict str) {
 
 internal void parse_args(struct GameArgs* restrict args, uint argc, const char* restrict* restrict argv) {
 	// Default values
-	args->fps = 60;
+	args->fps = FPS_DEFAULT;
 	args->arena = 1024 * 1024;
+	args->width = 1280;
+	args->height = 720;
+	args->fullscreen = false;
 	
 	// Parse arguments
 	for (uint i = 1; i < argc; ++i) {
@@ -119,13 +126,22 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 		
 		u64 hash = hash_of(arg + 1); // ignore first character
 		
+#define __write_field(field, format) \
+do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to %u.\n", argv[i], args->field); break; } ++i; arg = argv[i]; sscanf(arg, (format), &args->field); } while (0)
+		
 		switch (hash) {
+			case 9764440143728963103ull: __write_field(width, "%u"); break;
+			case 6516563984122755906ull: __write_field(height, "%u"); break;
+			case 6524616317257075368ull: __write_field(fps, "%u"); break;
+			case 8933775003454995288ull:
+			case 3757225043954947422ull: __write_field(fullscreen, "%u"); break;
+			
 			// arena
 			case 4533368378118350312ull: {
 				++i;
 				arg = argv[i];
 				if (!arg) {
-					printf("Missing value for argument '-arena'. Default to %zu.\n", args->arena);
+					debug_error("Missing value for argument '-arena'. Default to %zu.\n", args->arena);
 					
 					break;
 				}
@@ -134,7 +150,7 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 				sscanf(arg, "%zu", &s);
 				
 				if (s < args->arena) {
-					printf("Argument for '-arena' shall be greater than the default value %zu. Ignoring flag.\n", args->arena);
+					debug_error("Argument for '-arena' shall be greater than the default value %zu. Ignoring flag.\n", args->arena);
 					
 					break;
 				}
@@ -142,23 +158,12 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 				args->arena = s;
 			} break;
 			
-			// fps
-			case 6524616317257075368ull: {
-				++i;
-				arg = argv[i];
-				if (!arg) {
-					printf("Missing value for argument '-fps'. Default to %u.\n", args->fps);
-					
-					break;
-				}
-				
-				sscanf(arg, "%u", &args->fps);
-			} break;
-			
 			// Unknown
 			default: {
-				printf("Ignoring argument '%s'\n", arg);
+				debug_error("Ignoring argument '%s'\n", arg);
 			} break;
 		}
+		
+#undef __write_field
 	}
 }
