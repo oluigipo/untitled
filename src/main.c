@@ -2,9 +2,10 @@
 #include "std.h"
 #include <time.h>
 #include "memory.c"
+#include "debug.c"
 
 #define STB_IMAGE_IMPLEMENTATION
-#ifdef DEBUG
+#ifdef TCC
 #define STBI_NO_SIMD
 #endif
 #define STBI_MALLOC mem_alloc

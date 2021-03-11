@@ -45,9 +45,6 @@ uint scene_main(void) {
 		0, 0xFFFFFF
 	};
 	
-	//clock_t timer = clock();
-	
-	//for (uint i = 0; i < 5000 && (glDeleteTextures(1, &text.id), true); ++i)
 	if (0 != text_render(&text, str, colorData,
 						 assets_textures_info[TEX_DEFAULT_FONT].tileSize,
 						 assets_textures[TEX_DEFAULT_FONT])) {
@@ -55,9 +52,9 @@ uint scene_main(void) {
 		exit(1);
 	}
 	
-	//printf("Time: %i / %i\n", clock() - timer, CLOCKS_PER_SEC);
-	
 	printf("%i, %i, %i\n", text.width, text.height, text.id);
+	
+	f32 angle = 0.0f;
 	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
@@ -67,9 +64,12 @@ uint scene_main(void) {
 		if (keyboard_is_pressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
+		angle += 0.05f;
+		
 		glm_mat4_identity(object);
 		glm_translate(object, (vec3) { mouse.pos[0], mouse.pos[1] });
 		glm_scale(object, (vec3) { 256.0f, 256.0f });
+		glm_rotate(object, angle, (vec3) { 0.0f, 0.0f, 1.0f });
 		glm_translate(object, (vec3) { -0.5f, -0.5f });
 		
 		// Draw
