@@ -35,7 +35,6 @@ struct GameGlobalState {
 	u64 frameCount;
 	f64 deltaTime;
 	uint targetFPS; // The desired FPS
-	f64 frameRate; // Desired time to spend on each frame (seconds)
 	f64 lastFrame; // Time when the last frame started (seconds)
 	f64 frameBegin; // Time when the current frame started (seconds)
 	

@@ -36,3 +36,27 @@ typedef double f64;
 typedef size_t usize;
 typedef ptrdiff_t isize;
 
+#define U8_MIN 0
+#define U8_MAX UCHAR_MAX
+#define U16_MIN 0
+#define U16_MAX USHRT_MAX
+#define U32_MIN 0
+#define U32_MAX UINT_MAX
+#define U64_MIN 0
+#define U64_MAX ULLONG_MAX
+
+#define I8_MIN SCHAR_MIN
+#define I8_MAX SCHAR_MAX
+#define I16_MIN SHRT_MIN
+#define I16_MAX SHRT_MAX
+#define I32_MIN INT_MIN
+#define I32_MAX INT_MAX
+#define I64_MIN LLONG_MIN
+#define I64_MAX LLONG_MAX
+
+#define USIZE_MIN 0
+#define USIZE_MAX SIZE_MAX
+
+#define ISIZE_MIN PTRDIFF_MIN
+#define ISIZE_MAX PTRDIFF_MAX
+

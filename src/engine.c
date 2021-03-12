@@ -16,7 +16,6 @@ uint engine_init(const struct GameArgs* restrict args) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwSwapInterval(0);
 	
 	GLFWwindow* window = glfwCreateWindow(args->width, args->height, "game", NULL, NULL);
 	if (!window) {
@@ -27,6 +26,8 @@ uint engine_init(const struct GameArgs* restrict args) {
 	
 	glfwMakeContextCurrent(window);
 	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	
+	glfwSwapInterval(!args->novsync);
 	
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	glfwSetWindowPos(window, mode->width / 2 - args->width / 2, mode->height / 2 - args->height / 2);
@@ -43,8 +44,6 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.window.width = args->width;
 	game.window.height = args->height;
 	game.targetFPS = args->fps;
-	// TODO(luigi): If 'frameRate' is 0, the 'deltaTime' is so low that it suffers from precision.
-	game.frameRate = (args->novsync) ? 0.000 : 1.0 / args->fps;
 	game.lastFrame = glfwGetTime();
 	game.framebufferStackSize = 1;
 	game.shaderStackSize = 1;
@@ -79,40 +78,11 @@ void engine_begin_frame(void) {
 }
 
 void engine_end_frame(void) {
-	debug_noscope(
-				  static f64 maxFrameDuration = 0;
-				  static f64 minFrameDuration = 10000000;
-				  static f64 frameDurationCount = 0;
-				  );
-	
 	++game.frameCount;
 	arena_clear(&game.frameArena);
+	game.lastFrame = game.frameBegin;
+	
 	glfwSwapBuffers(game.apiWindow);
-	
-	f64 frameEnd = glfwGetTime();
-	f64 frameDuration = (frameEnd - game.frameBegin);
-	
-	game.lastFrame = frameEnd;
-	
-	debug({
-			  frameDurationCount += frameDuration;
-			  if (maxFrameDuration < frameDuration)
-				  maxFrameDuration = frameDuration;
-			  if (minFrameDuration > frameDuration)
-				  minFrameDuration = frameDuration;
-			  
-			  if (game.frameCount % game.targetFPS == 0) {
-				  debug_print("Frame Info:\n\tMin Duration: %f ms\n\tAverage Duration: %f ms\n\tMax Duration: %f ms\n", minFrameDuration * 1000.0, frameDurationCount / 60.0 * 1000.0, maxFrameDuration * 1000.0);
-				  minFrameDuration = 10000000;
-				  maxFrameDuration = 0;
-				  frameDurationCount = 0;
-			  }
-		  });
-	
-	// V-Sync
-	if (game.frameRate > frameDuration) {
-		os_sleep_ns((game.frameRate - frameDuration) * 1000000000);
-	}
 }
 
 void engine_deinit(void) {
