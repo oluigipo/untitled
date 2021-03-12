@@ -44,7 +44,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.window.height = args->height;
 	game.targetFPS = args->fps;
 	// TODO(luigi): If 'frameRate' is 0, the 'deltaTime' is so low that it suffers from precision.
-	game.frameRate = (args->novsync) ? 0 : 1.0 / args->fps;
+	game.frameRate = (args->novsync) ? 0.000 : 1.0 / args->fps;
 	game.lastFrame = glfwGetTime();
 	game.framebufferStackSize = 1;
 	game.shaderStackSize = 1;
@@ -79,6 +79,12 @@ void engine_begin_frame(void) {
 }
 
 void engine_end_frame(void) {
+	debug_noscope(
+				  static f64 maxFrameDuration = 0;
+				  static f64 minFrameDuration = 10000000;
+				  static f64 frameDurationCount = 0;
+				  );
+	
 	++game.frameCount;
 	arena_clear(&game.frameArena);
 	glfwSwapBuffers(game.apiWindow);
@@ -87,6 +93,21 @@ void engine_end_frame(void) {
 	f64 frameDuration = (frameEnd - game.frameBegin);
 	
 	game.lastFrame = frameEnd;
+	
+	debug({
+			  frameDurationCount += frameDuration;
+			  if (maxFrameDuration < frameDuration)
+				  maxFrameDuration = frameDuration;
+			  if (minFrameDuration > frameDuration)
+				  minFrameDuration = frameDuration;
+			  
+			  if (game.frameCount % game.targetFPS == 0) {
+				  debug_print("Frame Info:\n\tMin Duration: %f ms\n\tAverage Duration: %f ms\n\tMax Duration: %f ms\n", minFrameDuration * 1000.0, frameDurationCount / 60.0 * 1000.0, maxFrameDuration * 1000.0);
+				  minFrameDuration = 10000000;
+				  maxFrameDuration = 0;
+				  frameDurationCount = 0;
+			  }
+		  });
 	
 	// V-Sync
 	if (game.frameRate > frameDuration) {

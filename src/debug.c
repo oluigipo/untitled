@@ -2,6 +2,7 @@
 #ifdef DEBUG
 
 #define debug(code) do { code ;} while (0)
+#define debug_noscope(code) code
 
 #define debug_print(...) printf(__VA_ARGS__)
 #define debug_error(...) fprintf(stderr, __VA_ARGS__)
@@ -12,6 +13,7 @@
 #else // ifdef DEBUG
 
 #define debug(code) do {} while (0)
+#define debug_noscope(code) 
 
 #define debug_print(...) 0
 #define debug_error(...) 0
