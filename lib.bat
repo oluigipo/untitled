@@ -1,1 +1,1 @@
-set LIB=-Llib -Iinclude -lgdi32 -lopengl32 -lcglm -luser32 -lkernel32 -lmsvcrt -lshell32
+set LIB=-Llib/win -Iinclude -lgdi32 -lopengl32 -lcglm -luser32 -lkernel32 -lmsvcrt -lshell32

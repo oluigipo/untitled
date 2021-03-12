@@ -2,8 +2,11 @@
 struct TextureLoadInfo {
 	const char* restrict path;
 	
-	union ____ {
-		struct ___ {
+	union {
+		struct {
+#if 0
+			______something;
+#endif
 			uint tileWidth, tileHeight;
 		};
 		vec2u tileSize;

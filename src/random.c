@@ -5,7 +5,7 @@ internal inline u64 __rotl(const u64 x, int k) {
 }
 
 // Generates a random number between 0 and ULLONG_MAX
-u64 random(void) {
+u64 random_u64(void) {
 	const u64 s0 = random_seed[0];
 	u64 s1 = random_seed[1];
 	const u64 result = __rotl(s0 + s1, 17) + s0;
@@ -32,7 +32,7 @@ void random_init(void) {
 				s0 ^= random_seed[0];
 				s1 ^= random_seed[1];
 			}
-			random();
+			random_u64();
 		}
 	}
 	
@@ -42,12 +42,12 @@ void random_init(void) {
 
 // Generates a random number between 0 and 1
 f64 random_f64(void) {
-	return (f64)random() / ULLONG_MAX;
+	return (f64)random_u64() / ULLONG_MAX;
 }
 
 // 32 bits version of random()
 u32 random_u32(void) {
-	u64 result = random();
+	u64 result = random_u64();
 	return ((u32*)&result)[1]; // the higher bits are more random.
 }
 
