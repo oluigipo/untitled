@@ -1,3 +1,10 @@
+// Interface
+internal inline void os_sleep_ms(u64 ms);
+internal inline void os_sleep_ns(u64 ms);
+internal inline u64 os_time_ms(void);
+internal inline u64 os_time_ns(void);
+
+//~ Windows Stuff
 #if defined(OS_WINDOWS)
 #include <windows.h>
 #include <time.h>
@@ -23,7 +30,8 @@ internal inline u64 os_time_ns(void) {
 		return GetTickCount() * 1000000;
 }
 
-#else
+//~ Linux Stuff
+#elif defined(OS_LINUX)
 #include <time.h>
 #include <unistd.h>
 
@@ -48,4 +56,7 @@ internal inline u64 os_time_ns(void) {
         return os_time_ms() * 1000000ull;
 }
 
+//~ Error message
+#else
+#error This should be compiled only on Windows & Linux. If you want to support your platform, please implement the functions found in 'src/os.c'
 #endif
