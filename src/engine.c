@@ -43,7 +43,8 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.window.width = args->width;
 	game.window.height = args->height;
 	game.targetFPS = args->fps;
-	game.frameRate = 1000 / args->fps;
+	// TODO(luigi): If 'frameRate' is 0, the 'deltaTime' is so low that it suffers from precision.
+	game.frameRate = (args->novsync) ? 5 : 1000 / args->fps;
 	game.framebufferStackSize = 1;
 	game.shaderStackSize = 1;
 	
@@ -69,7 +70,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 
 void engine_begin_frame(void) {
 	game.frameBegin = glfwGetTime();
-	game.deltaTime = (f32)((game.frameBegin - game.lastFrame) * FPS_DEFAULT);
+	game.deltaTime = (game.frameBegin - game.lastFrame) * FPS_DEFAULT;
 	
 	// NOTE(luigi): glfwPollEvents(void) is inside input_update(void).
 	//              mouse input is 1 frame behind VS oldKeys not working.
@@ -88,7 +89,7 @@ void engine_end_frame(void) {
 	
 	// V-Sync
 	if (game.frameRate > frameDuration) {
-		Sleep(game.frameRate - frameDuration);
+		os_sleep(game.frameRate - frameDuration);
 	}
 }
 

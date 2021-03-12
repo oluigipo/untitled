@@ -58,6 +58,7 @@ struct GameArgs {
 	uint width;
 	uint height;
 	b8 fullscreen;
+	b8 novsync;
 };
 
 typedef uint vec2u[2];
@@ -114,6 +115,9 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 	args->width = 1280;
 	args->height = 720;
 	args->fullscreen = false;
+	args->novsync = false;
+	
+	debug_print("%llu\n", hash_of("novsync"));
 	
 	// Parse arguments
 	for (uint i = 1; i < argc; ++i) {
@@ -128,13 +132,15 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 		
 #define __write_field(field, format) \
 do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to %u.\n", argv[i], args->field); break; } ++i; arg = argv[i]; sscanf(arg, (format), &args->field); } while (0)
+#define __write_flag(field, value) do { args->field = (value); } while (0)
 		
 		switch (hash) {
 			case 9764440143728963103ull: __write_field(width, "%u"); break;
 			case 6516563984122755906ull: __write_field(height, "%u"); break;
 			case 6524616317257075368ull: __write_field(fps, "%u"); break;
-			case 8933775003454995288ull:
-			case 3757225043954947422ull: __write_field(fullscreen, "%u"); break;
+			case 8933775003454995288ull: // fs
+			case 3757225043954947422ull: __write_flag(fullscreen, true); break;
+			case 12467242310557729319ull: __write_flag(novsync, true); break;
 			
 			// arena
 			case 4533368378118350312ull: {
@@ -165,5 +171,6 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 		}
 		
 #undef __write_field
+#undef __write_flag
 	}
 }

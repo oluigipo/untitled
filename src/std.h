@@ -14,6 +14,7 @@
 #include "types.h"
 #include "memory.c"
 #include "debug.c"
+#include "os.c"
 
 // Let the compiler do it's job
 int printf(const char* restrict, ...);

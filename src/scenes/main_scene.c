@@ -49,10 +49,8 @@ uint scene_main(void) {
 						 assets_textures_info[TEX_DEFAULT_FONT].tileSize,
 						 assets_textures[TEX_DEFAULT_FONT])) {
 		printf("Failed.\n");
-		exit(1);
+		return 1;
 	}
-	
-	debug_print("%i, %i, %i\n", text.width, text.height, text.id);
 	
 	f32 angle = 0.0f;
 	
@@ -64,7 +62,6 @@ uint scene_main(void) {
 		if (keyboard_is_pressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
-		debug_print("%f\n", game.deltaTime);
 		angle += 0.05f * game.deltaTime;
 		
 		glm_mat4_identity(object);
