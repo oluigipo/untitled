@@ -33,9 +33,9 @@ struct GameGlobalState {
 	
 	// Frame time calculation
 	u64 frameCount;
-	f32 deltaTime;
-	f32 targetFPS; // The desired FPS
-	uint frameRate; // Desired time to spend on each frame (milliseconds)
+	f64 deltaTime;
+	uint targetFPS; // The desired FPS
+	f64 frameRate; // Desired time to spend on each frame (seconds)
 	f64 lastFrame; // Time when the last frame started (seconds)
 	f64 frameBegin; // Time when the current frame started (seconds)
 	
@@ -116,8 +116,6 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 	args->height = 720;
 	args->fullscreen = false;
 	args->novsync = false;
-	
-	debug_print("%llu\n", hash_of("novsync"));
 	
 	// Parse arguments
 	for (uint i = 1; i < argc; ++i) {
