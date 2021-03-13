@@ -1,62 +1,66 @@
 // Interface
-internal inline void os_sleep_ms(u64 ms);
-internal inline void os_sleep_ns(u64 ms);
-internal inline u64 os_time_ms(void);
-internal inline u64 os_time_ns(void);
+void os_message_box(const char* restrict title, const char* restrict str);
+void os_assertion_failure(const char* restrict what);
 
 //~ Windows Stuff
 #if defined(OS_WINDOWS)
 #include <windows.h>
-#include <time.h>
+#include <stdio.h>
+#define EXECUTABLE_NAME "game.exe"
 
-internal inline void os_sleep_ms(u64 ms) {
-	Sleep(ms);
+void os_message_box(const char* restrict title, const char* restrict str) {
+	MessageBoxA(NULL, str, title, MB_ICONERROR | MB_OK | MB_DEFBUTTON1);
 }
 
-internal inline void os_sleep_ns(u64 ns) {
-	os_sleep_ms(ns / 1000000); // well then
-}
-
-internal inline u64 os_time_ms(void) {
-	return clock() / (CLOCKS_PER_SEC / 1000);
-}
-
-internal inline u64 os_time_ns(void) {
-	LARGE_INTEGER result;
+void os_assertion_failure(const char* restrict what) {
+	char cmdline[1024];
+	PROCESS_INFORMATION processInformation;
+    STARTUPINFO startupInfo;
 	
-	if (QueryPerformanceCounter(&result))
-		return result.QuadPart;
-	else // fallback
-		return GetTickCount() * 1000000;
+	ZeroMemory(&processInformation, sizeof processInformation);
+	ZeroMemory(&startupInfo, sizeof startupInfo);
+	
+	startupInfo.cb = sizeof(startupInfo);
+	
+	snprintf(cmdline, sizeof cmdline, EXECUTABLE_NAME " -error \"%s\"", what);
+	b32 result = CreateProcessA(NULL, cmdline, NULL, NULL, false, NORMAL_PRIORITY_CLASS | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupInfo, &processInformation);
+	
+	if (!result) {
+		debug_error("Assertion Failure:\n\t%s\n", what);
+		getchar();
+	} else {
+		WaitForSingleObject(processInformation.hProcess, INFINITE);
+	}
+	
+	exit(1);
 }
 
 //~ Linux Stuff
 #elif defined(OS_LINUX)
 #include <time.h>
 #include <unistd.h>
+#include <stdio.h>
+#define EXECUTABLE_NAME "./game"
 
-internal inline void os_sleep_ms(u64 ms) {
-	usleep(ms * 1000);
-}
-
-internal inline void os_sleep_ns(u64 ns) {
-	nanosleep(&(struct timespec) { .tv_nsec = ns }, &(struct timespec) { 0 });
-}
-
-internal inline u64 os_time_ms(void) {
-	return clock() / (CLOCKS_PER_SEC / 1000);
-}
-
-internal inline u64 os_time_ns(void) {
-	struct timespec ts;
+void os_message_box(const char* restrict title, const char* restrict str) {
+	char cmdline[1024];
 	
-	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
-        return ((u64)ts.tv_sec * 1000000000ull + (u64)ts.tv_nsec);
-    else // fallback
-        return os_time_ms() * 1000000ull;
+	snprintf(cmdline, sizeof cmdline, "zenity --error --text=\"%s\" --title=\"%s\"", str, title);
+	system(cmdline);
 }
 
-//~ Error message
-#else
-#error This should be compiled only on Windows & Linux. If you want to support your platform, please implement the functions found in 'src/os.c'
+void os_assertion_failure(const char* restrict what) {
+	os_message_box("Assertion Failure", what);
+	exit(1);
+	
+	return;
+	char cmdline[1024];
+	snprintf(cmdline, sizeof cmdline, EXECUTABLE_NAME " -error \"%s\"", what);
+	if (system(cmdline) != 0) {
+		debug_error("Assertion Failure:\n\t%s\n", what);
+	}
+	
+	exit(1);
+}
+
 #endif

@@ -79,6 +79,17 @@ void engine_begin_frame(void) {
 void engine_end_frame(void) {
 	++game.frameCount;
 	arena_clear(&game.frameArena);
+	
+	debug({
+			  static f64 sum = 0;
+			  sum += glfwGetTime() - game.frameBegin;
+			  
+			  if (game.frameCount % 60 == 0) {
+				  debug_print("Average Frame Time: %f ms\n", sum / FPS_DEFAULT * 1000);
+				  sum = 0;
+			  }
+		  });
+	
 	game.lastFrame = game.frameBegin;
 	
 	glfwSwapBuffers(game.apiWindow);

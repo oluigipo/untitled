@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include "debug.c"
 #include "os.c"
 
 // Includes
@@ -8,13 +9,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include <assert.h>
 #include <math.h>
 #include <time.h>
 
 // My things
 #include "memory.c"
-#include "debug.c"
 
 // Let the compiler do it's job
 int printf(const char* restrict, ...);

@@ -4,7 +4,7 @@ internal inline u64 __rotl(const u64 x, int k) {
 	return (x << k) | (x >> (64 - k));
 }
 
-// Generates a random number between 0 and ULLONG_MAX
+// Generates a random number between 0 and U64_MAX
 u64 random_u64(void) {
 	const u64 s0 = random_seed[0];
 	u64 s1 = random_seed[1];

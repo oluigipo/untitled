@@ -9,6 +9,7 @@
 #define STBI_MALLOC mem_alloc
 #define STBI_REALLOC mem_realloc
 #define STBI_FREE mem_free
+#define STBI_ASSERT assert
 #include "glad.c"
 #include <glfw3.h>
 #include <cglm/cglm.h>
@@ -88,7 +89,7 @@ int main(int argc, char* argv[]) {
 	game.currentScene = scene_main;
 	do {
 		result = game.currentScene();
-	} while (game.currentScene && !result);
+	} while (game.currentScene && result == 0);
 	
 	engine_deinit();
 	return result;
@@ -155,6 +156,19 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 				}
 				
 				args->arena = s;
+			} break;
+			
+			// error
+			case 4572260697409423185ull: {
+				++i;
+				arg = argv[i];
+				if (!arg) {
+					debug_error("WTF????");
+				}
+				
+				os_message_box("Assertion Failure", arg);
+				
+				exit(0);
 			} break;
 			
 			// Unknown

@@ -64,8 +64,12 @@ uint scene_main(void) {
 		
 		angle += 0.05 * game.deltaTime;
 		
-		if (angle > GLM_PI*2)
+		assert(angle <= GLM_PI*2);
+		
+		
+		if (angle > GLM_PI*2) {
 			angle -= GLM_PI*2;
+		}
 		
 		glm_mat4_identity(object);
 		glm_translate(object, (vec3) { mouse.pos[0], mouse.pos[1] });
