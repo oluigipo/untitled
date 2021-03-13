@@ -62,12 +62,10 @@ uint scene_main(void) {
 		if (keyboard_is_pressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
-		debug_print("%.20f + %.20f = ", angle, game.deltaTime);
 		angle += 0.05 * game.deltaTime;
-		debug_print("%.20f\n", angle);
 		
 		if (angle > GLM_PI*2)
-			angle -= GLM_PI*2;;
+			angle -= GLM_PI*2;
 		
 		glm_mat4_identity(object);
 		glm_translate(object, (vec3) { mouse.pos[0], mouse.pos[1] });

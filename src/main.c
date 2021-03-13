@@ -34,7 +34,6 @@ struct GameGlobalState {
 	// Frame time calculation
 	u64 frameCount;
 	f64 deltaTime;
-	uint targetFPS; // The desired FPS
 	f64 lastFrame; // Time when the last frame started (seconds)
 	f64 frameBegin; // Time when the current frame started (seconds)
 	
@@ -53,7 +52,6 @@ struct GameGlobalState {
 
 struct GameArgs {
 	usize arena;
-	uint fps;
 	uint width;
 	uint height;
 	b8 fullscreen;
@@ -109,7 +107,6 @@ internal u64 hash_of(const char* restrict str) {
 
 internal void parse_args(struct GameArgs* restrict args, uint argc, const char* restrict* restrict argv) {
 	// Default values
-	args->fps = FPS_DEFAULT;
 	args->arena = 1024 * 1024;
 	args->width = 1280;
 	args->height = 720;
@@ -134,7 +131,6 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 		switch (hash) {
 			case 9764440143728963103ull: __write_field(width, "%u"); break;
 			case 6516563984122755906ull: __write_field(height, "%u"); break;
-			case 6524616317257075368ull: __write_field(fps, "%u"); break;
 			case 8933775003454995288ull: // fs
 			case 3757225043954947422ull: __write_flag(fullscreen, true); break;
 			case 12467242310557729319ull: __write_flag(novsync, true); break;

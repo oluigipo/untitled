@@ -43,7 +43,6 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.apiWindow = window;
 	game.window.width = args->width;
 	game.window.height = args->height;
-	game.targetFPS = args->fps;
 	game.lastFrame = glfwGetTime();
 	game.framebufferStackSize = 1;
 	game.shaderStackSize = 1;
