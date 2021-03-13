@@ -40,6 +40,7 @@ void os_assertion_failure(const char* restrict what) {
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #define EXECUTABLE_NAME "./game"
 
 void os_message_box(const char* restrict title, const char* restrict str) {

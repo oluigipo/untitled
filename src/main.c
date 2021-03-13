@@ -1,4 +1,5 @@
 // Includes
+#define NDEBUG
 #define __CREATE_IMPL__
 #include "std.h"
 
