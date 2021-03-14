@@ -1,5 +1,8 @@
-typedef uint Shader;
-typedef uint Uniform;
+#include "headers/shader.h"
+#include "headers/opengl.h"
+#include "headers/file.h"
+#include "headers/debug.h"
+#include "headers/global.h"
 
 Shader shader_load(const char* restrict name) {
 	char path[64];

@@ -1,3 +1,6 @@
+#include "headers/file.h"
+#include <stdio.h>
+
 usize file_read(const char* restrict fname, char* buffer, usize buffSize) {
 	FILE* file = fopen(fname, "r");
 	if (!file)

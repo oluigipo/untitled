@@ -38,19 +38,19 @@ static PFNWGLGETPROCADDRESSPROC_PRIVATE gladGetProcAddressPtr;
 
 #ifdef _MSC_VER
 #ifdef __has_include
-  #if __has_include(<winapifamily.h>)
-    #define HAVE_WINAPIFAMILY 1
-  #endif
+#if __has_include(<winapifamily.h>)
+#define HAVE_WINAPIFAMILY 1
+#endif
 #elif _MSC_VER >= 1700 && !_USING_V110_SDK71_
-  #define HAVE_WINAPIFAMILY 1
+#define HAVE_WINAPIFAMILY 1
 #endif
 #endif
 
 #ifdef HAVE_WINAPIFAMILY
-  #include <winapifamily.h>
-  #if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
-    #define IS_UWP 1
-  #endif
+#include <winapifamily.h>
+#if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+#define IS_UWP 1
+#endif
 #endif
 
 static
@@ -64,7 +64,7 @@ int open_gl(void) {
         return gladGetProcAddressPtr != NULL;
     }
 #endif
-
+	
     return 0;
 }
 
@@ -96,22 +96,22 @@ int open_gl(void) {
 #else
     static const char *NAMES[] = {"libGL.so.1", "libGL.so"};
 #endif
-
+	
     unsigned int index = 0;
     for(index = 0; index < (sizeof(NAMES) / sizeof(NAMES[0])); index++) {
         libGL = dlopen(NAMES[index], RTLD_NOW | RTLD_GLOBAL);
-
+		
         if(libGL != NULL) {
 #if defined(__APPLE__) || defined(__HAIKU__)
             return 1;
 #else
             gladGetProcAddressPtr = (PFNGLXGETPROCADDRESSPROC_PRIVATE)dlsym(libGL,
-                "glXGetProcAddressARB");
+																			"glXGetProcAddressARB");
             return gladGetProcAddressPtr != NULL;
 #endif
         }
     }
-
+	
     return 0;
 }
 
@@ -128,7 +128,7 @@ static
 void* get_proc(const char *namez) {
     void* result = NULL;
     if(libGL == NULL) return NULL;
-
+	
 #if !defined(__APPLE__) && !defined(__HAIKU__)
     if(gladGetProcAddressPtr != NULL) {
         result = gladGetProcAddressPtr(namez);
@@ -141,18 +141,18 @@ void* get_proc(const char *namez) {
         result = dlsym(libGL, namez);
 #endif
     }
-
+	
     return result;
 }
 
 int gladLoadGL(void) {
     int status = 0;
-
+	
     if(open_gl()) {
         status = gladLoadGLLoader(&get_proc);
         close_gl();
     }
-
+	
     return status;
 }
 
@@ -177,21 +177,21 @@ static int get_exts(void) {
 #ifdef _GLAD_IS_SOME_NEW_VERSION
     } else {
         unsigned int index;
-
+		
         num_exts_i = 0;
         glGetIntegerv(GL_NUM_EXTENSIONS, &num_exts_i);
         if (num_exts_i > 0) {
             exts_i = (char **)malloc((size_t)num_exts_i * (sizeof *exts_i));
         }
-
+		
         if (exts_i == NULL) {
             return 0;
         }
-
+		
         for(index = 0; index < (unsigned)num_exts_i; index++) {
             const char *gl_str_tmp = (const char*)glGetStringi(GL_EXTENSIONS, index);
             size_t len = strlen(gl_str_tmp);
-
+			
             char *local_str = (char*)malloc((len+1) * sizeof(char));
             if(local_str != NULL) {
                 memcpy(local_str, gl_str_tmp, (len+1) * sizeof(char));
@@ -225,16 +225,16 @@ static int has_ext(const char *ext) {
         if(extensions == NULL || ext == NULL) {
             return 0;
         }
-
+		
         while(1) {
             loc = strstr(extensions, ext);
             if(loc == NULL) {
                 return 0;
             }
-
+			
             terminator = loc + strlen(ext);
             if((loc == extensions || *(loc - 1) == ' ') &&
-                (*terminator == ' ' || *terminator == '\0')) {
+			   (*terminator == ' ' || *terminator == '\0')) {
                 return 1;
             }
             extensions = terminator;
@@ -245,14 +245,14 @@ static int has_ext(const char *ext) {
         if(exts_i == NULL) return 0;
         for(index = 0; index < num_exts_i; index++) {
             const char *e = exts_i[index];
-
+			
             if(exts_i[index] != NULL && strcmp(e, ext) == 0) {
                 return 1;
             }
         }
     }
 #endif
-
+	
     return 0;
 }
 int GLAD_GL_VERSION_1_0 = 0;
@@ -1062,13 +1062,13 @@ static int find_extensionsGL(void) {
 }
 
 static void find_coreGL(void) {
-
+	
     /* Thank you @elmindreda
      * https://github.com/elmindreda/greg/blob/master/templates/greg.c.in#L176
      * https://github.com/glfw/glfw/blob/master/src/context.c#L36
      */
     int i, major, minor;
-
+	
     const char* version;
     const char* prefixes[] = {
         "OpenGL ES-CM ",
@@ -1076,10 +1076,10 @@ static void find_coreGL(void) {
         "OpenGL ES ",
         NULL
     };
-
+	
     version = (const char*) glGetString(GL_VERSION);
     if (!version) return;
-
+	
     for (i = 0;  prefixes[i];  i++) {
         const size_t length = strlen(prefixes[i]);
         if (strncmp(version, prefixes[i], length) == 0) {
@@ -1087,14 +1087,14 @@ static void find_coreGL(void) {
             break;
         }
     }
-
-/* PR #18 */
+	
+	/* PR #18 */
 #ifdef _MSC_VER
     sscanf_s(version, "%d.%d", &major, &minor);
 #else
     sscanf(version, "%d.%d", &major, &minor);
 #endif
-
+	
     GLVersion.major = major; GLVersion.minor = minor;
     max_loaded_major = major; max_loaded_minor = minor;
 	GLAD_GL_VERSION_1_0 = (major == 1 && minor >= 0) || major > 1;
@@ -1133,7 +1133,7 @@ int gladLoadGLLoader(GLADloadproc load) {
 	load_GL_VERSION_3_1(load);
 	load_GL_VERSION_3_2(load);
 	load_GL_VERSION_3_3(load);
-
+	
 	if (!find_extensionsGL()) return 0;
 	return GLVersion.major != 0 || GLVersion.minor != 0;
 }

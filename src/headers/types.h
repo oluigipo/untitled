@@ -1,10 +1,13 @@
 #pragma once
+
 #include <stdint.h>
 #include <stddef.h>
+#include <limits.h>
 
 #define true 1
 #define false 0
 #define internal static
+#define global extern
 
 #define restrict
 #undef restrict

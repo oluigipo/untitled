@@ -1,6 +1,5 @@
-// Interface
-void os_message_box(const char* restrict title, const char* restrict str);
-void os_assertion_failure(const char* restrict what);
+#include "headers/os.h"
+#include "headers/debug.h"
 
 //~ Windows Stuff
 #if defined(OS_WINDOWS)
@@ -26,7 +25,7 @@ void os_assertion_failure(const char* restrict what) {
 	b32 result = CreateProcessA(NULL, cmdline, NULL, NULL, false, NORMAL_PRIORITY_CLASS | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupInfo, &processInformation);
 	
 	if (!result) {
-		debug_error("Assertion Failure:\n\t%s\n", what);
+		debug_error("Assertion Failure:\n%s\n", what);
 		getchar();
 	} else {
 		WaitForSingleObject(processInformation.hProcess, INFINITE);
@@ -44,23 +43,22 @@ void os_assertion_failure(const char* restrict what) {
 #define EXECUTABLE_NAME "./game"
 
 void os_message_box(const char* restrict title, const char* restrict str) {
-	char cmdline[1024];
-	
-	snprintf(cmdline, sizeof cmdline, "zenity --error --text=\"%s\" --title=\"%s\"", str, title);
-	system(cmdline);
+	debug_print("do we really need an 'os_message_box()' implementation for linux?\n");
 }
 
 void os_assertion_failure(const char* restrict what) {
-	os_message_box("Assertion Failure", what);
-	exit(1);
+	pid_t pid;
+	int status;
 	
-	return;
-	char cmdline[1024];
-	snprintf(cmdline, sizeof cmdline, EXECUTABLE_NAME " -error \"%s\"", what);
-	if (system(cmdline) != 0) {
-		debug_error("Assertion Failure:\n\t%s\n", what);
+	pid = fork();
+	if (pid < 0) {
+		debug_error("Assertion Failure:\n%s\n", what);
+		getchar();
+	} else if (pid == 0) {
+		execl(EXECUTABLE_NAME, "-error", what, NULL);
 	}
 	
+	waitpid(pid, &status, 0);
 	exit(1);
 }
 

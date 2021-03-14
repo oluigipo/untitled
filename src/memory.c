@@ -1,4 +1,7 @@
-//#define MEM_TRACK_HEAP_ALLOCATIONS
+#include "headers/memory.h"
+#include <stdlib.h>
+#include <memory.h>
+#include "headers/debug.h"
 
 void* mem_alloc(usize size) {
 	void* ptr = malloc(size);
@@ -41,34 +44,19 @@ void mem_free(void* p) {
 	free(p);
 }
 
-//~ Arena Allocator
-// All alocations made in _arena will be reversed at the end of the scope.
-// NOTE(luigi): be careful with breaks and continues.
-#define arena_scope(_arena) for(usize __arn_c=(_arena).head;__arn_c!=SIZE_MAX;(_arena).head=__arn_c,__arn_c=SIZE_MAX)
-
-// To be used in loops. Manual 'arena_scope_end', so break and continue work as expected.
-#define arena_scope_begin(_arena) usize __arn_c=(_arena).head
-#define arena_scope_end(_arena) ((_arena).head=__arn_c)
-
-struct Arena {
-	usize head;
-	usize size;
-	void* buffer;
-};
-
-void arena_init(struct Arena* restrict arena, usize size) {
+void arena_init(Arena* restrict arena, usize size) {
 	arena->head = 0;
 	arena->size = size;
 	arena->buffer = mem_alloc(size);
 }
 
-void arena_deinit(struct Arena* restrict arena) {
+void arena_deinit(Arena* restrict arena) {
 	mem_free(arena->buffer);
 	arena->head = arena->size = 0;
 	arena->buffer = NULL;
 }
 
-void* arena_alloc(struct Arena* restrict arena, usize size) {
+void* arena_alloc(Arena* restrict arena, usize size) {
 	size = (size + 7) & ~7; // 8 byte alignment
 	
 	if (arena->head + size > arena->size) {
@@ -80,7 +68,7 @@ void* arena_alloc(struct Arena* restrict arena, usize size) {
 	return p;
 }
 
-void* arena_alloc_zero(struct Arena* restrict arena, usize size) {
+void* arena_alloc_zero(Arena* restrict arena, usize size) {
 	size = (size + 7) & ~7; // 8 byte alignment
 	
 	if (arena->head + size > arena->size) {
@@ -93,7 +81,7 @@ void* arena_alloc_zero(struct Arena* restrict arena, usize size) {
 	return p;
 }
 
-void arena_clear(struct Arena* restrict arena) {
+void arena_clear(Arena* restrict arena) {
 	arena->head = 0;
 }
 

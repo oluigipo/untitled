@@ -1,0 +1,17 @@
+#pragma once
+
+#include "std.h"
+#include "global.h"
+#include "memory.h"
+#include "debug.h"
+#include "engine.h"
+#include "file.h"
+#include "input.h"
+#include "opengl.h"
+#include "os.h"
+#include "random.h"
+#include "scenes.h"
+#include "shader.h"
+#include "text.h"
+#include "texture.h"
+#include "types.h"

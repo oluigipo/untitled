@@ -1,3 +1,11 @@
+#include "headers/engine.h"
+#include "headers/opengl.h"
+#include "headers/input.h"
+#include "headers/texture.h"
+#include "headers/random.h"
+#include "headers/debug.h"
+#include <stb_image.h>
+
 internal void glfwcallback_window_resize(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 	game.window.width = (uint)width;

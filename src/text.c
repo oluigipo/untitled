@@ -1,10 +1,7 @@
-// This is for rendering text
-
-struct TextVertexInfo {
-	vec2 offset;
-	vec3 color;
-	f32 chr;
-};
+#include "headers/text.h"
+#include "headers/opengl.h"
+#include "headers/shader.h"
+#include "headers/global.h"
 
 /*
  * colorData is just a buffer that contains pairs of integers which are (count, color).
@@ -195,8 +192,8 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	
 	// Finish
 	output->id = texture;
-	output->width = width;
-	output->height = height;
+	output->size[0] = width;
+	output->size[1] = height;
 	output->depth = 0;
 	
 	__exit:;

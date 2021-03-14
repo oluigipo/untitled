@@ -1,33 +1,11 @@
-#define keyboard_is_pressed(_key) (keyboard.key[_key] && !keyboard.oldKey[_key])
-#define keyboard_is_down(_key) (keyboard.key[_key])
-#define keyboard_is_released(_key) (!keyboard.key[_key] && keyboard.oldKey[_key])
-#define keyboard_is_up(_key) (!keyboard.key[_key])
+#include "headers/input.h"
+#include "headers/opengl.h"
+#include "headers/global.h"
+#include <memory.h>
 
-enum {
-	INPUT_KEYCOUNT = GLFW_KEY_LAST,
-	INPUT_BUTTONCOUNT = GLFW_MOUSE_BUTTON_LAST
-};
-
-struct Keyboard {
-	b8 key[INPUT_KEYCOUNT];
-	b8 oldKey[INPUT_KEYCOUNT];
-	
-	int lastKey;
-} keyboard = { 0 };
-
-struct Mouse {
-	b8 button[INPUT_BUTTONCOUNT];
-	b8 oldButton[INPUT_BUTTONCOUNT];
-	int scroll;
-	
-	vec2 pos;
-	vec2 oldPos;
-} mouse = { 0 };
-
-struct Gamepad {
-	int dummy;
-	// TODO
-} gamepad = { 0 };
+struct Keyboard keyboard = { 0 };
+struct Mouse mouse = { 0 };
+struct Gamepad gamepad = { 0 };
 
 internal void glfwcallback_key_update(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	keyboard.key[key] = (action != 0);

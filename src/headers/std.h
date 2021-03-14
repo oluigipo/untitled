@@ -1,7 +1,9 @@
 #pragma once
+
 #include "types.h"
-#include "debug.c"
-#include "os.c"
+#include "debug.h"
+#include "os.h"
+#include "memory.h"
 
 // Includes
 #include <memory.h>
@@ -11,9 +13,6 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
-
-// My things
-#include "memory.c"
 
 // Let the compiler do it's job
 int printf(const char* restrict, ...);
@@ -28,7 +27,7 @@ typedef struct string {
 // A dynamic null-terminated buffer of characters.
 typedef struct strbuf {
 	usize cap, len;
-	char data[0];
+	char data[];
 } strbuf;
 
 // Make a 'struct string' of a string literal

@@ -1,8 +1,10 @@
 #pragma once
+#undef assert
 
-//~ DEBUF
+//~ DEBUG
 #ifdef DEBUG
 #include <stdio.h>
+#include "os.h"
 
 #define debug(code) do { code ;} while (0)
 #define debug_noscope(code) code
@@ -15,7 +17,7 @@
 
 #define MACRO_STR(s) #s
 #define MACRO_STR_2(s) MACRO_STR(s)
-#define assert(cond) do { if(!(cond)) { os_assertion_failure( "FILE: " __FILE__ "\nLINE: " MACRO_STR_2(__LINE__) "\n\n" MACRO_STR(cond) ); } } while (0)
+#define assert(cond) do { if(!(cond)) { os_assertion_failure( "FILE: " __FILE__ "\nLINE: " MACRO_STR_2(__LINE__) "\n\n" #cond ); } } while (0)
 
 //~
 #else // ifdef DEBUG
@@ -33,4 +35,3 @@
 
 //~
 #endif // else ifdef DEBUG
-

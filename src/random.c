@@ -1,3 +1,7 @@
+#include "headers/random.h"
+#include <stdio.h>
+#include <time.h>
+
 internal u64 random_seed[2]; // u128
 
 internal inline u64 __rotl(const u64 x, int k) {

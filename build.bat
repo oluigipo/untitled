@@ -1,9 +1,8 @@
 @echo off
-call lib.bat
 cls
 echo Compiling in Release Mode.
 echo =====================================================
-gcc src/main.c -o game.exe -O2 -std=c99 -DOS_WINDOWS -lglfw3 %LIB% %*
+gcc unity_build.c -Isrc -o game.exe -O2 -std=c99 -DOS_WINDOWS -lglfw3 -Llib/win -Iinclude/win -lgdi32 -lopengl32 -lcglm -luser32 -lkernel32 -lmsvcrt -lshell32 %*
 
 if %ERRORLEVEL% EQU 0 (
 	echo Compilation Status: OK
