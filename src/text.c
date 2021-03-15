@@ -12,7 +12,7 @@
 *
 * also, colorData can be NULL. Then all the text will be white.
 */
-uint text_render(struct Texture* restrict output, string text, const uint* restrict colorData, const vec2u dim, u32 font) {
+uint text_render(struct Texture* restrict output, string text, const uint* restrict colorData, const struct Texture* restrict font) {
 	static Shader shader = 0;
 	static Uniform uniformFit;
 	static Uniform uniformTexture;
@@ -38,7 +38,7 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	if (!shader) {
 		shader = shader_load("res/text");
 		if (!shader) {
-			printf("Could not load text shader.\n");
+			debug_error("Could not load text shader.\n");
 			return 1;
 		}
 		
@@ -91,7 +91,7 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 		void* newbuf = mem_realloc(heapBuffer, bufferLen);
 		if (!newbuf) {
 			// panic
-			printf("Could not allocate memory!\nExiting.\n");
+			debug_error("Could not allocate memory!\nExiting.\n");
 			exit(1);
 		}
 		
@@ -150,8 +150,8 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	if (x > xRecord)
 		xRecord = x;
 	
-	width = xRecord * dim[0];
-	height = (y + 1) * dim[1];
+	width = xRecord * font->size[0];
+	height = (y + 1) * font->size[1];
 	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + bufferLen, NULL, GL_DYNAMIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof vertices, vertices);
@@ -169,7 +169,7 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	uint result = 0;
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		// panic
-		printf("Could not complete framebuffer for rendering the text.\n");
+		debug_error("Could not complete framebuffer for rendering the text.\n");
 		result = 1;
 		goto __exit;
 	}
@@ -180,7 +180,7 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, font);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, font->id);
 	
 	shader_bind(shader);
 	glUniform1i(uniformTexture, 0);
@@ -197,9 +197,7 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	output->depth = 0;
 	
 	__exit:;
-	glDeleteBuffers(1, &vbo);
 	glDeleteFramebuffers(1, &framebuffer);
-	glDeleteVertexArrays(1, &vao);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, game.framebufferStack[game.framebufferStackSize-1]);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

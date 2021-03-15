@@ -37,6 +37,19 @@ uint scene_main(void) {
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(f32) * 8, (void*)(sizeof(f32) * 6));
 	
+	Texture text;
+	string str = strlit("Hello, World! \x01\nThis is a sample text.");
+	uint colorData[] = {
+		5, 0xFF0000,
+		8, 0x00FFFF,
+		0, 0xFFFFFF
+	};
+	
+	if (0 != text_render(&text, str, colorData, &assets_textures[TEX_DEFAULT_FONT])) {
+		debug_error("Failed.\n");
+		return 1;
+	}
+	
 	f64 angle = 0.0f;
 	
 	// Game Loop
@@ -48,9 +61,8 @@ uint scene_main(void) {
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
 		angle += 0.05 * game.deltaTime;
-		
-		if (angle > GLM_PI*2) {
-			angle -= GLM_PI*2;
+		if (angle > TAU) {
+			angle -= TAU;
 		}
 		
 		glm_mat4_identity(object);
@@ -78,28 +90,11 @@ uint scene_main(void) {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
 		// Draw text
-		struct Texture text;
-		string str = strlit("Hello, World! \x01\nThis is a sample text.");
-		uint colorData[] = {
-			5, 0xFF0000,
-			8, 0x00FFFF,
-			0, 0xFFFFFF
-		};
-		
-		if (0 != text_render(&text, str, colorData,
-							 assets_textures[TEX_DEFAULT_FONT].size,
-							 assets_textures[TEX_DEFAULT_FONT].id)) {
-			printf("Failed.\n");
-			return 1;
-		}
-		
 		glm_mat4_identity(object);
 		glm_translate(object, (vec3) { game.window.width / 2, game.window.height / 2 });
 		glm_scale(object, (vec3) { text.size[0] * 5.0f, text.size[1] * 5.0f });
 		glm_translate(object, (vec3) { -0.5f, -0.5f });
 		
-		glBindVertexArray(vao);
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, text.id);
 		glUniform1i(uniformTex, 0);
 		glUniformMatrix4fv(uniformProj, 1, false, (f32*)game.projection);
@@ -115,6 +110,7 @@ uint scene_main(void) {
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
 	shader_unload(shader);
+	texture_free(&text);
 	
 	// Close the game
 	game.currentScene = NULL;

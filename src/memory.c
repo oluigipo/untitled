@@ -28,12 +28,12 @@ void* mem_realloc(void* p, usize size) {
 }
 
 void* mem_realloc_zero(void* p, usize count, usize size) {
-	assert(false);
-	void* ptr = NULL;
+	assert(!"mem_realloc_zero() doesn't have an implementation.");
+	
 #ifdef MEM_TRACK_HEAP_ALLOCATIONS
 	printf("Allocation Tracking: mem_realloc_zero(%p, %zu, %zu) -> %p\n", p, count, size, ptr);
 #endif
-	return ptr;
+	return NULL;
 }
 
 void mem_free(void* p) {

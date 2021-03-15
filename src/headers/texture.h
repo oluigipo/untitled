@@ -17,6 +17,7 @@ struct TextureLoadInfo {
 	};
 };
 
+typedef struct Texture Texture;
 struct Texture {
 	uint id;
 	vec2u size;
@@ -30,9 +31,9 @@ enum {
 };
 #undef _
 
-global struct Texture assets_textures[TEXTURE_COUNT];
+global Texture assets_textures[TEXTURE_COUNT];
 
 void texture_load_assets(void);
 void texture_free_assets(void);
-void texture_free(struct Texture* restrict texture);
+void texture_free(Texture* restrict texture);
 

@@ -10,5 +10,5 @@ struct TextVertexInfo {
 	f32 chr;
 };
 
-uint text_render(struct Texture* restrict output, string text, const uint* restrict colorData, const vec2u dim, u32 font);
+uint text_render(struct Texture* restrict output, string text, const uint* restrict colorData, const struct Texture* restrict font);
 

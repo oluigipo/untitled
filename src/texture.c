@@ -10,11 +10,11 @@ internal const struct TextureLoadInfo assets_textures_info[] = {
 #undef _
 };
 
-struct Texture assets_textures[TEXTURE_COUNT];
+Texture assets_textures[TEXTURE_COUNT];
 
 void texture_load_assets(void) {
-	struct Texture* texture = assets_textures;
-	struct Texture* const end = assets_textures + TEXTURE_COUNT;
+	Texture* texture = assets_textures;
+	Texture* const end = assets_textures + TEXTURE_COUNT;
 	const struct TextureLoadInfo* info = assets_textures_info;
 	
 	for (; texture != end; ++texture, ++info) {
@@ -88,7 +88,7 @@ void texture_free_assets(void) {
 		glDeleteTextures(1, &assets_textures[i].id);
 }
 
-void texture_free(struct Texture* restrict texture) {
+void texture_free(Texture* restrict texture) {
 	glDeleteTextures(1, &texture->id);
 }
 

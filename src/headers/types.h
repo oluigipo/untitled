@@ -63,3 +63,11 @@ typedef ptrdiff_t isize;
 #define ISIZE_MIN PTRDIFF_MIN
 #define ISIZE_MAX PTRDIFF_MAX
 
+#define PI32 ((f32)PI64)
+#define PI64 3.141592653589793238462643383279
+#define PI PI64
+
+#define TAU32 ((f32)PI32*2)
+#define TAU64 (PI64*2)
+#define TAU TAU64
+

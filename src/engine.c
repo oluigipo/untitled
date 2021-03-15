@@ -86,7 +86,16 @@ void engine_begin_frame(void) {
 
 void engine_end_frame(void) {
 	++game.frameCount;
-	arena_clear(&game.frameArena);
+	
+	// If 80% or more of it was used, double it's size, just to be safe.
+	if (game.frameArena.head >= game.frameArena.size - (game.frameArena.size / 5)) {
+		usize desiredSize = game.frameArena.size * 2;
+		
+		arena_deinit(&game.frameArena);
+		arena_init(&game.frameArena, desiredSize);
+	} else {
+		arena_clear(&game.frameArena);
+	}
 	
 	debug({
 			  static f64 sum = 0;
@@ -100,6 +109,7 @@ void engine_end_frame(void) {
 	
 	game.lastFrame = game.frameBegin;
 	
+	// Vsync and swap chain
 	glfwSwapBuffers(game.apiWindow);
 }
 

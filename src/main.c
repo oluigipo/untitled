@@ -21,7 +21,11 @@ internal u64 hash_of(const char* restrict str) {
 	u64 hash = 2166136261ull;
 	
 	while (*str) {
-		hash ^= (u64)*str++;
+		u8 value = (u64)*str++;
+		if (value > 0b01100000)
+			value &=~ 0b00100000;
+		
+		hash ^= value;
 		hash *= 16777619ull;
 	}
 	
@@ -52,14 +56,14 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 #define __write_flag(field, value) do { args->field = (value); } while (0)
 		
 		switch (hash) {
-			case 9764440143728963103ull: __write_field(width, "%u"); break;
-			case 6516563984122755906ull: __write_field(height, "%u"); break;
-			case 8933775003454995288ull: // fs
-			case 3757225043954947422ull: __write_flag(fullscreen, true); break;
-			case 12467242310557729319ull: __write_flag(novsync, true); break;
+			case 3298519710295134399ull: __write_field(width, "%u"); break;
+			case 14734894603901239938ull: __write_field(height, "%u"); break;
+			case 3748217411440170462ull: // fs
+			case 17893791189687017496ull: __write_flag(fullscreen, true); break;
+			case 16136394061700334151ull: __write_flag(novsync, true); break;
 			
 			// arena
-			case 4533368378118350312ull: {
+			case 2601567961011631409ull: {
 				++i;
 				arg = argv[i];
 				if (!arg) {
@@ -81,11 +85,12 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 			} break;
 			
 			// error
-			case 4572260697409423185ull: {
+			case 14697351840100226696ull: {
 				++i;
 				arg = argv[i];
 				if (!arg) {
 					debug_error("WTF????");
+					exit(1);
 				}
 				
 				os_message_box("Assertion Failure", arg);
