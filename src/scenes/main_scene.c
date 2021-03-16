@@ -52,6 +52,9 @@ uint scene_main(void) {
 	
 	f64 angle = 0.0f;
 	
+	vec2 position = { game.window.width / 2, game.window.height / 2 };
+	vec2 velocity = { 0 };
+	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
 		engine_begin_frame();
@@ -60,13 +63,17 @@ uint scene_main(void) {
 		if (keyboard_is_pressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
-		angle += 0.05 * game.deltaTime;
-		if (angle > TAU) {
-			angle -= TAU;
-		}
+		f32 targetSpeed = game.deltaTime * 5.0f + (gamepad_is_down(GPAD_BUTTON_A) * 3.0f);
+		velocity[0] = lerpf(velocity[0], gamepad.state.axes[GPAD_AXIS_LX] * targetSpeed, 0.3f);
+		velocity[1] = lerpf(velocity[1], gamepad.state.axes[GPAD_AXIS_LY] * targetSpeed, 0.3f);
+		
+		position[0] += velocity[0];
+		position[1] += velocity[1];
+		
+		angle += gamepad.state.axes[GPAD_AXIS_RX] * game.deltaTime * 0.05f;
 		
 		glm_mat4_identity(object);
-		glm_translate(object, (vec3) { mouse.pos[0], mouse.pos[1] });
+		glm_translate(object, (vec3) { position[0], position[1] });
 		glm_scale(object, (vec3) { 256.0f, 256.0f });
 		glm_rotate(object, angle, (vec3) { 0.0f, 0.0f, 1.0f });
 		glm_translate(object, (vec3) { -0.5f, -0.5f });

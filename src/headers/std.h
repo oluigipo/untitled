@@ -44,6 +44,15 @@ typedef List(void) List_generic; // Basic type for functions
 #define list_pop(list) ((list)->ptr[--(list)->len])
 #define list_free(list) (mem_free((list)->ptr), (list)->ptr = NULL, (list)->len = (list)->cap = 0)
 
+// More math stuff
+internal inline f32 lerpf(f32 a, f32 b, f32 t) {
+	return (b - a) * t + a;
+}
+
+internal inline f32 lerp(f64 a, f64 b, f64 t) {
+	return (b - a) * t + a;
+}
+
 #ifndef __CREATE_IMPL__
 
 /// string
