@@ -11,6 +11,8 @@
 #define gamepad_is_down(btn) (gamepad.state.buttons[btn])
 #define gamepad_is_released(btn) (!gamepad.state.buttons[btn] && gamepad.oldState.buttons[btn])
 #define gamepad_is_up(btn) (!gamepad.state.buttons[btn])
+#define gamepad_axis(a) (gamepad.state.axes[a])
+#define gamepad_axis_vec2(a) ((vec2) { gamepad_axis(a##X), gamepad_axis(a##Y) })
 
 #define GPAD_DEADZONE 0.05f
 

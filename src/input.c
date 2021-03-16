@@ -1,6 +1,7 @@
 #include "headers/input.h"
 #include "headers/opengl.h"
 #include "headers/global.h"
+#include "headers/debug.h"
 #include <memory.h>
 
 struct Keyboard keyboard = { 0 };
@@ -9,7 +10,9 @@ struct Gamepad gamepad = { .id = -1 };
 
 internal void glfwcallback_key_update(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	keyboard.key[key] = (action != 0);
-	keyboard.lastKey = key;
+	if (action == 1) {
+		keyboard.lastKey = key;
+	}
 }
 
 internal void glfwcallback_mouse_update(GLFWwindow* window, int button, int action, int mods) {
@@ -62,24 +65,29 @@ void input_update(void) {
 	mouse.pos[0] = (f32)x;
 	mouse.pos[1] = (f32)y;
 	
+	// If the gamepad was unpluged, disables it.
 	if (gamepad.id != -1 && !glfwJoystickPresent(gamepad.id))
 		gamepad.id = -1;
 	
+	// If there isn't a gamepad, check for one.
 	if (gamepad.id == -1) {
 		gamepad.id = input_check_for_gamepad();
 		
-		debug_log("gamepad.id = %i\n", gamepad.id);
-		
 		if (gamepad.id != -1) {
+			// There's a gamepad connected!
+			
 			gamepad.name = glfwGetGamepadName(gamepad.id);
 			debug_log("Gamepad name: %s\n", gamepad.name);
 			
 			input_update_gamepad();
 		} else {
+			// No gamepad. Map keyboard to gamepad instead.
+			
 			input_map_to_gamepad();
 		}
-		
 	} else {
+		// There's a gamepad connected, so just use it.
+		
 		input_update_gamepad();
 	}
 }
@@ -99,12 +107,9 @@ void input_map_to_gamepad(void) {
 }
 
 int input_check_for_gamepad(void) {
-	int id = GLFW_JOYSTICK_1;
-	
-	while (id <= GLFW_JOYSTICK_LAST) {
+	for (int id = GLFW_JOYSTICK_1; id <= GLFW_JOYSTICK_LAST; ++id) {
 		if (glfwJoystickPresent(id) && glfwJoystickIsGamepad(id))
 			return id;
-		++id;
 	}
 	
 	return -1;
