@@ -3,6 +3,8 @@
 #include <memory.h>
 #include "headers/debug.h"
 
+#define MEM_TRACK_HEAP_ALLOCATIONS
+
 void* mem_alloc(usize size) {
 	void* ptr = malloc(size);
 #ifdef MEM_TRACK_HEAP_ALLOCATIONS
@@ -29,11 +31,12 @@ void* mem_realloc(void* p, usize size) {
 
 void* mem_realloc_zero(void* p, usize count, usize size) {
 	assert(!"mem_realloc_zero() doesn't have an implementation.");
+	void* ptr = NULL;
 	
 #ifdef MEM_TRACK_HEAP_ALLOCATIONS
 	printf("Allocation Tracking: mem_realloc_zero(%p, %zu, %zu) -> %p\n", p, count, size, ptr);
 #endif
-	return NULL;
+	return ptr;
 }
 
 void mem_free(void* p) {

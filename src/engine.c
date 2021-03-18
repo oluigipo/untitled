@@ -1,9 +1,4 @@
-#include "headers/engine.h"
-#include "headers/opengl.h"
-#include "headers/input.h"
-#include "headers/texture.h"
-#include "headers/random.h"
-#include "headers/debug.h"
+#include "headers/all.h"
 #include <stb_image.h>
 
 internal void glfwcallback_window_resize(GLFWwindow* window, int width, int height) {
@@ -61,6 +56,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	stbi_set_flip_vertically_on_load(true);
 	texture_load_assets();
 	random_init();
+	locale_init();
 	
 	//debug(random_test());
 	
@@ -115,5 +111,6 @@ void engine_end_frame(void) {
 
 void engine_deinit(void) {
 	texture_free_assets();
+	locale_deinit();
 	glfwTerminate();
 }

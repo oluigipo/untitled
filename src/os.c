@@ -12,6 +12,10 @@ void os_message_box(const char* restrict title, const char* restrict str) {
 }
 
 void os_assertion_failure(const char* restrict what) {
+	os_message_box("Assertion Failure", what);
+	
+	// NOTE(luigi): This code will make this game a bomber. Opening itself over and over again until the end of time.
+#if 0
 	char cmdline[1024];
 	PROCESS_INFORMATION processInformation;
     STARTUPINFO startupInfo;
@@ -22,6 +26,7 @@ void os_assertion_failure(const char* restrict what) {
 	startupInfo.cb = sizeof(startupInfo);
 	
 	snprintf(cmdline, sizeof cmdline, EXECUTABLE_NAME " -error \"%s\"", what);
+	
 	b32 result = CreateProcessA(NULL, cmdline, NULL, NULL, false, NORMAL_PRIORITY_CLASS | CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupInfo, &processInformation);
 	
 	if (!result) {
@@ -30,6 +35,7 @@ void os_assertion_failure(const char* restrict what) {
 	} else {
 		WaitForSingleObject(processInformation.hProcess, INFINITE);
 	}
+#endif
 	
 	exit(1);
 }

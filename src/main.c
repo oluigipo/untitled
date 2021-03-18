@@ -1,7 +1,5 @@
 // Includes
 #define NDEBUG
-#define __CREATE_IMPL__
-#include "headers/std.h"
 #include "headers/all.h"
 
 // STB Image

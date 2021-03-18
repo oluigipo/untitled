@@ -1,7 +1,6 @@
 #pragma once
 
 #include "types.h"
-//#define MEM_TRACK_HEAP_ALLOCATIONS
 
 void* mem_alloc(usize size);
 void* mem_alloc_zero(usize count, usize size);
