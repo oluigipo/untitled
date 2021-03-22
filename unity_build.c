@@ -12,7 +12,8 @@
 #include "shader.c"
 #include "text.c"
 #include "texture.c"
+#include "particles.c"
 #include "scenes/main_scene.c"
-#include "std.c"
 
+#include "std.c"
 #include "main.c"

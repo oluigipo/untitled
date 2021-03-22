@@ -49,10 +49,13 @@ void os_assertion_failure(const char* restrict what) {
 #define EXECUTABLE_NAME "./game"
 
 void os_message_box(const char* restrict title, const char* restrict str) {
-	debug_print("do we really need an 'os_message_box()' implementation for linux?\n");
+	debug_print("============================\nMessage: %s\n%s\n============================\n", title, str);
 }
 
 void os_assertion_failure(const char* restrict what) {
+	os_message_box("Assertion Failure", what);
+	
+#if 0
 	pid_t pid;
 	int status;
 	
@@ -65,6 +68,8 @@ void os_assertion_failure(const char* restrict what) {
 	}
 	
 	waitpid(pid, &status, 0);
+#endif
+	
 	exit(1);
 }
 

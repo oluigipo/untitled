@@ -1,6 +1,5 @@
 #include "headers/locale.h"
 #include "headers/memory.h"
-#include <errno.h>
 #if TCC
 #include <dirent_imp.h>
 #else
@@ -76,6 +75,7 @@ void locale_init(void) {
 		assert(feof(localesFiles.ptr[i]));
 		fclose(localesFiles.ptr[i]);
 		
+		// Read each string in the file
 		string* strings = mem_alloc(sizeof(*strings) * TXT__COUNT);
 		list_push(&localesList, strings);
 		
@@ -112,5 +112,10 @@ void locale_deinit(void) {
 	locales = NULL;
 	localeCount = 0;
 	localesBuffer = NULL;
+}
+
+void locale_reload(void) {
+	locale_deinit();
+	locale_init();
 }
 

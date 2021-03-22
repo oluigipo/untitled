@@ -14,9 +14,6 @@
 #include <math.h>
 #include <time.h>
 
-// Let the compiler do it's job
-int printf(const char* restrict, ...);
-
 /// Structs
 // A range of characters in memory. Not necessarily null-terminated.
 typedef struct string {

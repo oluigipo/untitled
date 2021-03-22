@@ -30,3 +30,36 @@ void* arena_alloc(Arena* restrict arena, usize size);
 void* arena_alloc_zero(Arena* restrict arena, usize size);
 void arena_clear(Arena* restrict arena);
 
+// Stack Allocator
+typedef struct Stack Stack;
+struct Stack {
+	usize size;
+	struct StackHeader* header;
+	void* buffer;
+};
+
+struct StackHeader {
+	struct StackHeader* previous;
+	usize size;
+};
+
+void stack_init(Stack* stack, usize size);
+void stack_deinit(Stack* stack);
+void* stack_push(Stack* stack, usize size);
+void* stack_push_zero(Stack* stack, usize size);
+void stack_free(Stack* stack, void* ptr);
+void stack_pop(Stack* stack);
+void stack_clear(Stack* stack);
+
+// Pool Allocator
+typedef struct MemoryPool MemoryPool;
+struct MemoryPool {
+	int a;
+};
+
+void mempool_init(MemoryPool* pool);
+void mempool_deinit(MemoryPool* pool);
+
+
+
+

@@ -57,6 +57,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	texture_load_assets();
 	random_init();
 	locale_init();
+	partmgr_setup_rendering();
 	
 	//debug(random_test());
 	

@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include "std.h"
 
 #define locale_str(e) (locales[currentLocale][e])
 
@@ -15,3 +16,4 @@ global uint currentLocale;
 
 void locale_init(void);
 void locale_deinit(void);
+void locale_reload(void);

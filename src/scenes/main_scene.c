@@ -50,10 +50,14 @@ uint scene_main(void) {
 		return 1;
 	}
 	
+	// Walle things
 	f64 angle = 0.0f;
 	
 	vec2 position = { game.window.width / 2, game.window.height / 2 };
 	vec2 velocity = { 0 };
+	
+	// Particles
+	ParticleManager mgr = { 0 };
 	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
@@ -77,6 +81,18 @@ uint scene_main(void) {
 		glm_scale(object, (vec3) { 256.0f, 256.0f });
 		glm_rotate(object, angle, (vec3) { 0.0f, 0.0f, 1.0f });
 		glm_translate(object, (vec3) { -0.5f, -0.5f });
+		
+		if (gamepad_is_down(GPAD_BUTTON_B)) {
+			partmgr_add(&mgr, PART_SIMPLE, &(struct PartSimple) {
+							.pos = { position[0], position[1] },
+							.speed = { random_f64() * 18.0 - 8.0f, random_f64() * 16.0f - 8.0f },
+							.color = { random_f64(), random_f64(), random_f64() },
+							.alpha = 1.0f,
+							.angle = random_f64() * TAU
+						});
+		}
+		
+		partmgr_update(&mgr);
 		
 		// Draw
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -110,6 +126,10 @@ uint scene_main(void) {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
 		shader_unbind();
+		
+		mat4 view;
+		glm_mat4_identity(view);
+		partmgr_render(&mgr, view);
 		
 		engine_end_frame();
 	}

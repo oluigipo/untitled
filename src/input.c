@@ -104,6 +104,7 @@ void input_map_to_gamepad(void) {
 	
 	gamepad.state.axes[GPAD_AXIS_RX] = keyboard_is_down(GLFW_KEY_Q) - keyboard_is_down(GLFW_KEY_E);
 	gamepad.state.buttons[GPAD_BUTTON_A] = keyboard_is_down(GLFW_KEY_SPACE);
+	gamepad.state.buttons[GPAD_BUTTON_B] = keyboard_is_down(GLFW_KEY_LEFT_SHIFT);
 }
 
 int input_check_for_gamepad(void) {

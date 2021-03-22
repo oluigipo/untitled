@@ -16,3 +16,5 @@
 #include "headers/texture.h"
 #include "headers/types.h"
 #include "headers/locale.h"
+#include "headers/particles.h"
+#include "headers/shapes.h"

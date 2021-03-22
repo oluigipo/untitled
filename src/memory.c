@@ -3,7 +3,7 @@
 #include <memory.h>
 #include "headers/debug.h"
 
-#define MEM_TRACK_HEAP_ALLOCATIONS
+//#define MEM_TRACK_HEAP_ALLOCATIONS
 
 void* mem_alloc(usize size) {
 	void* ptr = malloc(size);
@@ -47,6 +47,7 @@ void mem_free(void* p) {
 	free(p);
 }
 
+// Arena Allocator
 void arena_init(Arena* restrict arena, usize size) {
 	arena->head = 0;
 	arena->size = size;
@@ -66,7 +67,7 @@ void* arena_alloc(Arena* restrict arena, usize size) {
 		return NULL;
 	}
 	
-	void* p = arena->buffer + arena->head;
+	void* p = (char*)arena->buffer + arena->head;
 	arena->head += size;
 	return p;
 }
@@ -78,7 +79,7 @@ void* arena_alloc_zero(Arena* restrict arena, usize size) {
 		return NULL;
 	}
 	
-	void* p = arena->buffer + arena->head;
+	void* p = (char*)arena->buffer + arena->head;
 	arena->head += size;
 	memset(p, 0, size);
 	return p;
@@ -87,4 +88,60 @@ void* arena_alloc_zero(Arena* restrict arena, usize size) {
 void arena_clear(Arena* restrict arena) {
 	arena->head = 0;
 }
+
+// Stack Allocator
+void stack_init(Stack* stack, usize size) {
+	size = (size + 7) & ~7;
+	
+	stack->size = size;
+	stack->buffer = mem_alloc(size);
+	stack->header = stack->buffer;
+	stack->header->previous = stack->header;
+	stack->header->size = 0;
+}
+
+void stack_deinit(Stack* stack) {
+	mem_free(stack->buffer);
+	stack->buffer = stack->header = NULL;
+	stack->size = 0;
+}
+
+void* stack_push(Stack* stack, usize size) {
+	size = (size + 7) & ~7;
+	
+	struct StackHeader* previous = stack->header->previous;
+	stack->header = (void*)((char*)(previous+1) + stack->header->size);
+	stack->header->previous = previous;
+	
+	stack->header->size = size;
+	return stack->header + 1;
+}
+
+void* stack_push_zero(Stack* stack, usize size) {
+	void* ptr = stack_push(stack, size);
+	memset(ptr, 0, size);
+	return ptr;
+}
+
+void stack_free(Stack* stack, void* ptr) {
+	struct StackHeader* header = ptr;
+	--header;
+	
+	if (stack->header == header) {
+		stack->header = header->previous;
+	} else {
+		struct StackHeader* next = (void*)((char*)ptr + header->size);
+		next->previous = header->previous;
+	}
+}
+
+void stack_pop(Stack* stack) {
+	stack->header = stack->header->previous;
+}
+
+void stack_clear(Stack* stack) {
+	stack->header = NULL;
+}
+
+
 

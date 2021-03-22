@@ -11,4 +11,5 @@ struct TextVertexInfo {
 };
 
 uint text_render(struct Texture* restrict output, string text, const uint* restrict colorData, const struct Texture* restrict font);
+void text_size(string text, vec2u out, const struct Texture* restrict font);
 

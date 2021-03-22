@@ -206,3 +206,30 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	
 	return result; // success
 }
+
+void text_size(string text, vec2u out, const struct Texture* restrict font) {
+	uint x = 0, y = 0;
+	uint xRecord = 0;
+	
+	for (uint i = 0; i < text.len; ++i) {
+		if (text.ptr[i] == '\n') {
+			++y;
+			
+			if (x > xRecord)
+				xRecord = x;
+			
+			x = 0;
+			
+			continue;
+		}
+		
+		++x;
+	}
+	
+	if (x > xRecord)
+		xRecord = x;
+	
+	out[0] = xRecord * font->size[0];
+	out[1] = (y + 1) * font->size[1];
+	
+}
