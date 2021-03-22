@@ -18,3 +18,4 @@
 #include "headers/locale.h"
 #include "headers/particles.h"
 #include "headers/shapes.h"
+#include "headers/camera.h"

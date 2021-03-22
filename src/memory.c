@@ -47,7 +47,7 @@ void mem_free(void* p) {
 	free(p);
 }
 
-// Arena Allocator
+//~ Arena Allocator
 void arena_init(Arena* restrict arena, usize size) {
 	arena->head = 0;
 	arena->size = size;
@@ -64,6 +64,7 @@ void* arena_alloc(Arena* restrict arena, usize size) {
 	size = (size + 7) & ~7; // 8 byte alignment
 	
 	if (arena->head + size > arena->size) {
+		assert(!"Arena is full!");
 		return NULL;
 	}
 	
@@ -76,6 +77,7 @@ void* arena_alloc_zero(Arena* restrict arena, usize size) {
 	size = (size + 7) & ~7; // 8 byte alignment
 	
 	if (arena->head + size > arena->size) {
+		assert(!"Arena is full!");
 		return NULL;
 	}
 	
@@ -89,7 +91,7 @@ void arena_clear(Arena* restrict arena) {
 	arena->head = 0;
 }
 
-// Stack Allocator
+//~ Stack Allocator
 void stack_init(Stack* stack, usize size) {
 	size = (size + 7) & ~7;
 	
@@ -127,6 +129,8 @@ void stack_free(Stack* stack, void* ptr) {
 	struct StackHeader* header = ptr;
 	--header;
 	
+	assert(ptr >= stack->buffer && ptr < (char*)stack->buffer + stack->size);
+	
 	if (stack->header == header) {
 		stack->header = header->previous;
 	} else {
@@ -140,8 +144,63 @@ void stack_pop(Stack* stack) {
 }
 
 void stack_clear(Stack* stack) {
-	stack->header = NULL;
+	stack->header = stack->buffer;
 }
 
+//~ Pool Allocator
+void pool_init(MemoryPool* pool, usize chunkSize, usize chunkCount) {
+	chunkSize = (chunkSize + 7) & ~7;
+	
+	pool->size = chunkSize;
+	pool->count = chunkCount;
+	pool->buffer = mem_alloc(chunkSize * chunkCount);
+	pool->next = NULL;
+	
+	pool_clear(pool);
+}
 
+void pool_deinit(MemoryPool* pool) {
+	mem_free(pool->buffer);
+	pool->size = 0;
+	pool->count = 0;
+	pool->next = pool->buffer = NULL;
+}
+
+void* pool_alloc(MemoryPool* pool) {
+	struct MemoryPoolHeader* header = pool->next;
+	
+	if (!header) {
+		assert(!"MemoryPool has no free space left!");
+		return NULL;
+	}
+	
+	pool->next = header->next;
+	return header;
+}
+
+void* pool_alloc_zero(MemoryPool* pool) {
+	void* ptr = pool_alloc(pool);
+	memset(ptr, 0, pool->size);
+	return ptr;
+}
+
+void pool_free(MemoryPool* pool, void* ptr) {
+	assert(ptr >= pool->buffer && ptr < (char*)pool->buffer + (pool->count * pool->size));
+	
+	struct MemoryPoolHeader* header = ptr;
+	
+	header->next = pool->next;
+	pool->next = header;
+}
+
+void pool_clear(MemoryPool* pool) {
+	struct MemoryPoolHeader* header;
+	
+	for (usize i = 0; i < pool->count; ++i) {
+		header = (void*)((char*)pool->buffer + pool->size * i);
+		
+		header->next = pool->next;
+		pool->next = header;
+	}
+}
 

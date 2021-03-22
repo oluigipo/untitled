@@ -16,6 +16,7 @@ struct PartSimple {
 	PARTICLE_BASE;
 	
 	vec2 pos;
+	vec2 scale;
 	vec2 speed;
 	vec3 color;
 	f32 alpha;

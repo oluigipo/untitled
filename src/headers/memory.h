@@ -54,11 +54,24 @@ void stack_clear(Stack* stack);
 // Pool Allocator
 typedef struct MemoryPool MemoryPool;
 struct MemoryPool {
-	int a;
+	usize count;
+	usize size;
+	void* buffer;
+	struct MemoryPoolHeader* next;
 };
 
-void mempool_init(MemoryPool* pool);
-void mempool_deinit(MemoryPool* pool);
+struct MemoryPoolHeader {
+	struct MemoryPoolHeader* next;
+};
+
+void pool_init(MemoryPool* pool, usize chunkSize, usize chunkCount);
+void pool_deinit(MemoryPool* pool);
+void* pool_alloc(MemoryPool* pool);
+void* pool_alloc_zero(MemoryPool* pool);
+void pool_free(MemoryPool* pool, void* ptr);
+void pool_clear(MemoryPool* pool);
+
+
 
 
 

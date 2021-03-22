@@ -32,7 +32,7 @@ internal u64 hash_of(const char* restrict str) {
 
 internal void parse_args(struct GameArgs* restrict args, uint argc, const char* restrict* restrict argv) {
 	// Default values
-	args->arena = 1024 * 1024;
+	args->mem = 1024 * 1024;
 	args->width = 1280;
 	args->height = 720;
 	args->fullscreen = false;
@@ -60,12 +60,12 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 			case 17893791189687017496ull: __write_flag(fullscreen, true); break;
 			case 16136394061700334151ull: __write_flag(novsync, true); break;
 			
-			// arena
-			case 2601567961011631409ull: {
+			// mem
+			case 15779855643795709214ull: {
 				++i;
 				arg = argv[i];
 				if (!arg) {
-					debug_error("Missing value for argument '-arena'. Default to %zu.\n", args->arena);
+					debug_error("Missing value for argument '-mem'. Default to %zu.\n", args->mem);
 					
 					break;
 				}
@@ -73,13 +73,13 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 				usize s;
 				sscanf(arg, "%zu", &s);
 				
-				if (s < args->arena) {
-					debug_error("Argument for '-arena' shall be greater than the default value %zu. Ignoring flag.\n", args->arena);
+				if (s < args->mem) {
+					debug_error("Argument for '-mem' shall be greater than the default value %zu. Ignoring flag.\n", args->mem);
 					
 					break;
 				}
 				
-				args->arena = s;
+				args->mem = s;
 			} break;
 			
 			// error

@@ -9,9 +9,8 @@ internal u32 u32_min(u32 a, u32 b) {
 }
 
 #define partmgr_add_template(T, field) do {\
-u32 index = mgr->field.count < MAX_PARTICLE_COUNT ? ++mgr->field.count : (random_u32() & (MAX_PARTICLE_COUNT-1));\
+u32 index = mgr->field.count < MAX_PARTICLE_COUNT ? mgr->field.count++ : (random_u32() & (MAX_PARTICLE_COUNT-1));\
 mgr->field.data[index] = partData ? *(T*)partData : (T) { 0 };\
-++mgr->field.count;\
 } while (0)
 
 void partmgr_add(ParticleManager* mgr, ParticleKind kind, void* partData) {
@@ -34,17 +33,16 @@ void partmgr_update(ParticleManager* mgr) {
 	b32 notdeleted = true;
 	
 	// PART_SIMPLE
-	assert(mgr->simple.count < MAX_PARTICLE_COUNT);
+	assert(mgr->simple.count <= MAX_PARTICLE_COUNT);
 	for (u32 i = 0; i < mgr->simple.count; i += notdeleted, notdeleted = true) {
 		struct PartSimple* part = &mgr->simple.data[i];
 		
-		glm_vec2_scale(part->speed, 0.9f * game.deltaTime, part->speed);
+		glm_vec2_lerp(part->speed, (vec2) { 0 }, 0.1f * game.deltaTime, part->speed);
 		vec2 speedToAdd = { part->speed[0] * game.deltaTime, part->speed[1] * game.deltaTime };
 		glm_vec2_add(part->pos, speedToAdd, part->pos);
-		part->alpha -= 0.05f * game.deltaTime;
+		part->alpha -= 0.01f * game.deltaTime;
 		part->angle += 0.05 * game.deltaTime;
 		
-		debug_log("alpha: %f\n", part->alpha);
 		if (part->alpha <= 0.0f) {
 			partmgr_remove(simple, i);
 		}
@@ -59,7 +57,6 @@ internal struct ParticleManagerRenderingData {
 	uint vbo, vao;
 	
 	Shader shader;
-	Uniform projection;
 	Uniform view;
 	
 	Uniform matrices;
@@ -92,7 +89,6 @@ void partmgr_setup_rendering(void) {
 	
 	Shader shader = shader_load("res/particles");
 	partmgrRenderingData.shader = shader;
-	partmgrRenderingData.projection = shader_uniform(shader, "uProjection");
 	partmgrRenderingData.view = shader_uniform(shader, "uView");
 	partmgrRenderingData.spriteIndex = shader_uniform(shader, "uSpriteIndex");
 	partmgrRenderingData.texture = shader_uniform(shader, "uTexture");
@@ -104,7 +100,6 @@ void partmgr_render(ParticleManager* mgr, mat4 view) {
 	glBindVertexArray(partmgrRenderingData.vao);
 	
 	shader_bind(partmgrRenderingData.shader);
-	glUniformMatrix4fv(partmgrRenderingData.projection, 1, false, (f32*)game.projection);
 	glUniformMatrix4fv(partmgrRenderingData.view, 1, false, (f32*)view);
 	glUniform1i(partmgrRenderingData.texture, 0);
 	glUniform1f(partmgrRenderingData.spriteIndex, 0.0f);
@@ -122,10 +117,11 @@ void partmgr_render(ParticleManager* mgr, mat4 view) {
 		glm_mat4_identity(objects[i]);
 		glm_translate(objects[i], (vec3) { part->pos[0], part->pos[1] });
 		glm_scale(objects[i], (vec3) {
-					  assets_textures[TEX_PARTICLES].size[0] * 2,
-					  assets_textures[TEX_PARTICLES].size[1] * 2
+					  assets_textures[TEX_PARTICLES].size[0] * 2 * part->scale[0],
+					  assets_textures[TEX_PARTICLES].size[1] * 2 * part->scale[1]
 				  });
 		glm_rotate(objects[i], part->angle, (vec3) { 0.0f, 0.0f, 1.0f });
+		glm_translate(objects[i], (vec3) { -0.5f, -0.5f });
 		
 		glm_vec4(part->color, part->alpha, colors[i]);
 	}

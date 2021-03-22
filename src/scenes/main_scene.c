@@ -4,7 +4,7 @@ uint scene_main(void) {
 	Shader shader = shader_load("res/shader");
 	
 	Uniform uniformTex = shader_uniform(shader, "uTexture");
-	Uniform uniformProj = shader_uniform(shader, "uProjection");
+	Uniform uniformView = shader_uniform(shader, "uView");
 	Uniform uniformObj = shader_uniform(shader, "uObject");
 	
 	mat4 object;
@@ -51,13 +51,19 @@ uint scene_main(void) {
 	}
 	
 	// Walle things
-	f64 angle = 0.0f;
-	
-	vec2 position = { game.window.width / 2, game.window.height / 2 };
+	vec2 position = { 0, 0 };
 	vec2 velocity = { 0 };
 	
 	// Particles
 	ParticleManager mgr = { 0 };
+	
+	// Camera
+	struct Camera camera = {
+		.pos = { 0, 0 },
+		.angle = 0,
+		.zoom = 2,
+		.speed = 0
+	};
 	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
@@ -67,24 +73,24 @@ uint scene_main(void) {
 		if (keyboard_is_pressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
-		f32 targetSpeed = game.deltaTime * 5.0f + (gamepad_is_down(GPAD_BUTTON_A) * 3.0f);
-		velocity[0] = lerpf(velocity[0], gamepad.state.axes[GPAD_AXIS_LX] * targetSpeed, 0.3f);
-		velocity[1] = lerpf(velocity[1], gamepad.state.axes[GPAD_AXIS_LY] * targetSpeed, 0.3f);
+		f32 targetSpeed = 3.0f + 2.0f * gamepad_axis(GPAD_AXIS_R2);
+		velocity[0] = lerpf(velocity[0], gamepad.state.axes[GPAD_AXIS_LX] * targetSpeed, 0.3f * game.deltaTime);
+		velocity[1] = lerpf(velocity[1], gamepad.state.axes[GPAD_AXIS_LY] * targetSpeed, 0.3f * game.deltaTime);
 		
-		position[0] += velocity[0];
-		position[1] += velocity[1];
-		
-		angle += gamepad.state.axes[GPAD_AXIS_RX] * game.deltaTime * 0.05f;
+		position[0] += velocity[0] * game.deltaTime;
+		position[1] += velocity[1] * game.deltaTime;
 		
 		glm_mat4_identity(object);
 		glm_translate(object, (vec3) { position[0], position[1] });
-		glm_scale(object, (vec3) { 256.0f, 256.0f });
-		glm_rotate(object, angle, (vec3) { 0.0f, 0.0f, 1.0f });
+		glm_scale(object, (vec3) { assets_textures[TEX_WALLE].size[0], assets_textures[TEX_WALLE].size[1] });
 		glm_translate(object, (vec3) { -0.5f, -0.5f });
 		
-		if (gamepad_is_down(GPAD_BUTTON_B)) {
+		if (gamepad_is_down(GPAD_BUTTON_A)) {
+			f32 scale = random_f64() * 0.5f + 0.5f;
+			
 			partmgr_add(&mgr, PART_SIMPLE, &(struct PartSimple) {
 							.pos = { position[0], position[1] },
+							.scale = { scale, scale },
 							.speed = { random_f64() * 18.0 - 8.0f, random_f64() * 16.0f - 8.0f },
 							.color = { random_f64(), random_f64(), random_f64() },
 							.alpha = 1.0f,
@@ -93,6 +99,10 @@ uint scene_main(void) {
 		}
 		
 		partmgr_update(&mgr);
+		camera_update(&camera);
+		
+		mat4 view;
+		camera_matrix(&camera, view);
 		
 		// Draw
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -107,28 +117,24 @@ uint scene_main(void) {
 		shader_bind(shader);
 		
 		glUniform1i(uniformTex, 0);
-		glUniformMatrix4fv(uniformProj, 1, false, (f32*)game.projection);
+		glUniformMatrix4fv(uniformView, 1, false, (f32*)view);
 		glUniformMatrix4fv(uniformObj, 1, false, (f32*)object);
 		
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
 		// Draw text
 		glm_mat4_identity(object);
-		glm_translate(object, (vec3) { game.window.width / 2, game.window.height / 2 });
-		glm_scale(object, (vec3) { text.size[0] * 5.0f, text.size[1] * 5.0f });
+		glm_scale(object, (vec3) { text.size[0] * 2, text.size[1] * 2 });
 		glm_translate(object, (vec3) { -0.5f, -0.5f });
 		
 		glBindTexture(GL_TEXTURE_2D, text.id);
 		glUniform1i(uniformTex, 0);
-		glUniformMatrix4fv(uniformProj, 1, false, (f32*)game.projection);
 		glUniformMatrix4fv(uniformObj, 1, false, (f32*)object);
 		
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
 		shader_unbind();
 		
-		mat4 view;
-		glm_mat4_identity(view);
 		partmgr_render(&mgr, view);
 		
 		engine_end_frame();

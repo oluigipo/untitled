@@ -18,8 +18,6 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	static Uniform uniformTexture;
 	static Uniform uniformProj;
 	
-	static void* heapBuffer;
-	static usize heapSize;
 	static mat4 proj;
 	
 	static uint vao;
@@ -87,17 +85,7 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	
 	// Allocate vertex buffer data
 	usize bufferLen = text.len * sizeof(struct TextVertexInfo);
-	if (heapSize < bufferLen) {
-		void* newbuf = mem_realloc(heapBuffer, bufferLen);
-		if (!newbuf) {
-			// panic
-			debug_error("Could not allocate memory!\nExiting.\n");
-			exit(1);
-		}
-		
-		heapBuffer = newbuf;
-		heapSize = bufferLen;
-	}
+	void* heapBuffer = stack_push(&game.frameStack, bufferLen);
 	
 	// Write vertex buffer & calculate texture size
 	struct TextVertexInfo* infos = heapBuffer;
@@ -203,6 +191,7 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glViewport(0, 0, game.window.width, game.window.height);
+	stack_pop(&game.frameStack);
 	
 	return result; // success
 }

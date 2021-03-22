@@ -1,25 +1,17 @@
+#include "headers/camera.h"
 #include "headers/opengl.h"
 
-struct Camera {
-	vec3 pos;
-	vec3 vel;
-	f32 speed;
-};
-
-void camera_setup(struct Camera* restrict cam) {
-	*cam = (struct Camera) {
-		.speed = 0.5f
-	};
-}
-
 void camera_update(struct Camera* restrict cam) {
-	// ...
+	
 }
 
-void camera_matrix(const struct Camera* restrict cam, mat4 out) {
-	// ...
+void camera_matrix(struct Camera* restrict cam, mat4 out) {
+	glm_mat4_identity(out);
 	
-	// glm_translate(out, cam->pos);
-	// glm_rotate(out, );
+	glm_rotate(out, cam->angle, (vec3) { 0.0f, 0.0f, 1.0f });
+	glm_scale(out, (vec3) { cam->zoom, cam->zoom });
+	glm_translate(out, (vec3) { -cam->pos[0], -cam->pos[1] });
+	
+	glm_mat4_mul(game.projection, out, out);
 }
 

@@ -7,7 +7,7 @@ internal void glfwcallback_window_resize(GLFWwindow* window, int width, int heig
 	game.window.height = (uint)height;
 	
 	glm_mat4_identity(game.projection);
-	glm_ortho(0.0f, (f32)width, (f32)height, 0.0f, -1.0f, 1.0f, game.projection);
+	glm_ortho((f32)-width/2, (f32)width/2, (f32)height/2, (f32)-height/2, -1.0f, 1.0f, game.projection);
 }
 
 uint engine_init(const struct GameArgs* restrict args) {
@@ -51,7 +51,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.shaderStackSize = 1;
 	
 	// Init some other things
-	arena_init(&game.frameArena, args->arena);
+	stack_init(&game.frameStack, args->mem);
 	input_init();
 	stbi_set_flip_vertically_on_load(true);
 	texture_load_assets();
@@ -85,13 +85,13 @@ void engine_end_frame(void) {
 	++game.frameCount;
 	
 	// If 80% or more of it was used, double it's size, just to be safe.
-	if (game.frameArena.head >= game.frameArena.size - (game.frameArena.size / 5)) {
-		usize desiredSize = game.frameArena.size * 2;
+	if ((usize)game.frameStack.header - (usize)game.frameStack.buffer >= game.frameStack.size / 5 * 4) {
+		usize desiredSize = game.frameStack.size * 2;
 		
-		arena_deinit(&game.frameArena);
-		arena_init(&game.frameArena, desiredSize);
+		stack_deinit(&game.frameStack);
+		stack_init(&game.frameStack, desiredSize);
 	} else {
-		arena_clear(&game.frameArena);
+		stack_clear(&game.frameStack);
 	}
 	
 	debug({

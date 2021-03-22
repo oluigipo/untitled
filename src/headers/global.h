@@ -36,11 +36,11 @@ struct GameGlobalState {
 	uint shaderStackSize;
 	
 	// Temporary Memory
-	Arena frameArena; // Temporary memory for things that should live an entire frame.
+	Stack frameStack; // Temporary memory for things that should live a single frame.
 };
 
 struct GameArgs {
-	usize arena;
+	usize mem;
 	uint width;
 	uint height;
 	b8 fullscreen;

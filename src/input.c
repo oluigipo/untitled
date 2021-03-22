@@ -103,6 +103,13 @@ void input_map_to_gamepad(void) {
 		glm_vec2_normalize(gamepad.state.axes);
 	
 	gamepad.state.axes[GPAD_AXIS_RX] = keyboard_is_down(GLFW_KEY_Q) - keyboard_is_down(GLFW_KEY_E);
+	gamepad.state.axes[GPAD_AXIS_RY] = mouse.scroll;
+	
+	gamepad.state.axes[GPAD_AXIS_R2] = keyboard_is_down(GLFW_KEY_2);
+	gamepad.state.axes[GPAD_AXIS_L2] = keyboard_is_down(GLFW_KEY_1);
+	
+	gamepad.state.buttons[GPAD_BUTTON_RIGHT] = keyboard_is_down(GLFW_KEY_RIGHT);
+	gamepad.state.buttons[GPAD_BUTTON_LEFT] = keyboard_is_down(GLFW_KEY_LEFT);
 	gamepad.state.buttons[GPAD_BUTTON_A] = keyboard_is_down(GLFW_KEY_SPACE);
 	gamepad.state.buttons[GPAD_BUTTON_B] = keyboard_is_down(GLFW_KEY_LEFT_SHIFT);
 }
