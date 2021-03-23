@@ -58,6 +58,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	random_init();
 	locale_init();
 	partmgr_setup_rendering();
+	sound_init();
 	
 	//debug(random_test());
 	
@@ -95,12 +96,17 @@ void engine_end_frame(void) {
 	}
 	
 	debug({
-			  static f64 sum = 0;
-			  sum += glfwGetTime() - game.frameBegin;
+			  static f64 sumTotal = 0;
+			  static f64 sumWasted = 0;
 			  
-			  if (game.frameCount % 60 == 0) {
-				  debug_print("Average Frame Time: %f ms\n", sum / FPS_DEFAULT * 1000);
-				  sum = 0;
+			  f64 now = glfwGetTime();
+			  sumTotal += now - game.lastFrame;
+			  sumWasted += now - game.frameBegin;
+			  
+			  if (sumTotal > 1.0) {
+				  debug_print("Average Frame Time: %f ms\n", sumWasted / FPS_DEFAULT * 1000);
+				  sumTotal = 0;
+				  sumWasted = 0;
 			  }
 		  });
 	
@@ -113,5 +119,6 @@ void engine_end_frame(void) {
 void engine_deinit(void) {
 	texture_free_assets();
 	locale_deinit();
+	sound_deinit();
 	glfwTerminate();
 }

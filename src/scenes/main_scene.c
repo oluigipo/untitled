@@ -74,8 +74,8 @@ uint scene_main(void) {
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
 		f32 targetSpeed = 3.0f + 2.0f * gamepad_axis(GPAD_AXIS_R2);
-		velocity[0] = lerpf(velocity[0], gamepad.state.axes[GPAD_AXIS_LX] * targetSpeed, 0.3f * game.deltaTime);
-		velocity[1] = lerpf(velocity[1], gamepad.state.axes[GPAD_AXIS_LY] * targetSpeed, 0.3f * game.deltaTime);
+		velocity[0] = lerpf(velocity[0], gamepad_axis(GPAD_AXIS_LX) * targetSpeed, 0.3f * game.deltaTime);
+		velocity[1] = lerpf(velocity[1], gamepad_axis(GPAD_AXIS_LY) * targetSpeed, 0.3f * game.deltaTime);
 		
 		position[0] += velocity[0] * game.deltaTime;
 		position[1] += velocity[1] * game.deltaTime;
@@ -99,7 +99,6 @@ uint scene_main(void) {
 		}
 		
 		partmgr_update(&mgr);
-		camera_update(&camera);
 		
 		mat4 view;
 		camera_matrix(&camera, view);

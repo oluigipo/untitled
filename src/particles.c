@@ -1,5 +1,4 @@
 #include "headers/particles.h"
-#include "headers/shapes.h"
 #include "headers/opengl.h"
 
 internal u32 u32_min(u32 a, u32 b) {

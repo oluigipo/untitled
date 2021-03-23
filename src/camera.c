@@ -1,10 +1,6 @@
 #include "headers/camera.h"
 #include "headers/opengl.h"
 
-void camera_update(struct Camera* restrict cam) {
-	
-}
-
 void camera_matrix(struct Camera* restrict cam, mat4 out) {
 	glm_mat4_identity(out);
 	

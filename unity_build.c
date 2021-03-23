@@ -13,6 +13,7 @@
 #include "text.c"
 #include "texture.c"
 #include "particles.c"
+#include "sound.c"
 #include "scenes/main_scene.c"
 
 #include "std.c"

@@ -19,3 +19,4 @@
 #include "headers/particles.h"
 #include "headers/shapes.h"
 #include "headers/camera.h"
+#include "headers/sound.h"

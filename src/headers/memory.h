@@ -9,14 +9,6 @@ void* mem_reallod_zero(void* p, usize count, usize size);
 void mem_free(void* p);
 
 // Arena Allocator
-// All alocations made in _arena will be reversed at the end of the scope.
-// NOTE(luigi): be careful with breaks and continues.
-#define arena_scope(_arena) for(usize __arn_c=(_arena).head;__arn_c!=SIZE_MAX;(_arena).head=__arn_c,__arn_c=SIZE_MAX)
-
-// To be used in loops. Manual 'arena_scope_end', so break and continue work as expected.
-#define arena_scope_begin(_arena) usize __arn_c=(_arena).head
-#define arena_scope_end(_arena) ((_arena).head=__arn_c)
-
 typedef struct Arena Arena;
 struct Arena {
 	usize head;
@@ -47,6 +39,8 @@ void stack_init(Stack* stack, usize size);
 void stack_deinit(Stack* stack);
 void* stack_push(Stack* stack, usize size);
 void* stack_push_zero(Stack* stack, usize size);
+#define stack_alloc stack_push
+#define stack_alloc_zero stack_push_zero
 void stack_free(Stack* stack, void* ptr);
 void stack_pop(Stack* stack);
 void stack_clear(Stack* stack);
@@ -70,9 +64,4 @@ void* pool_alloc(MemoryPool* pool);
 void* pool_alloc_zero(MemoryPool* pool);
 void pool_free(MemoryPool* pool, void* ptr);
 void pool_clear(MemoryPool* pool);
-
-
-
-
-
 
