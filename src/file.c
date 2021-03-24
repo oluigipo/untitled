@@ -29,7 +29,7 @@ usize file_dump(const char* restrict fname, char** restrict out) {
 		return 0;
 	}
 	
-	fread(buffer, 1, len, file);
+	len = fread(buffer, 1, len, file);
 	buffer[len] = 0;
 	fclose(file);
 	

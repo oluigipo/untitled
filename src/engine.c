@@ -60,6 +60,8 @@ uint engine_init(const struct GameArgs* restrict args) {
 	partmgr_setup_rendering();
 	sound_init();
 	
+	currentLocale = args->locale;
+	
 	//debug(random_test());
 	
 	// Initialize OpenGL things

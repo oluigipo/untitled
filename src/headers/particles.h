@@ -3,7 +3,6 @@
 
 // NOTE(luigi): this should be a power of two
 #define MAX_PARTICLE_COUNT 128
-#define PARTICLE_BASE b32 active
 
 typedef enum ParticleKind ParticleKind;
 enum ParticleKind {
@@ -13,8 +12,6 @@ enum ParticleKind {
 };
 
 struct PartSimple {
-	PARTICLE_BASE;
-	
 	vec2 pos;
 	vec2 scale;
 	vec2 speed;

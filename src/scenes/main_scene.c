@@ -65,11 +65,29 @@ uint scene_main(void) {
 		.speed = 0
 	};
 	
+	// Music
+	uint buffer = sound_load_file("assets/test.ogg");
+	uint source = sound_make_source();
+	
+	sound_source_buffer(source, buffer);
+	sound_play_source(source);
+	
+	b32 playingSound = true;
+	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
 		engine_begin_frame();
 		
 		// Update
+		if (keyboard_is_pressed(GLFW_KEY_TAB)) {
+			playingSound = !playingSound;
+			
+			if (playingSound)
+				sound_play_source(source);
+			else
+				sound_pause_source(source);
+		}
+		
 		if (keyboard_is_pressed(GLFW_KEY_ESCAPE))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
@@ -143,6 +161,9 @@ uint scene_main(void) {
 	glDeleteVertexArrays(1, &vao);
 	shader_unload(shader);
 	texture_free(&text);
+	
+	sound_delete_source(source);
+	sound_unload(buffer);
 	
 	// Close the game
 	game.currentScene = NULL;

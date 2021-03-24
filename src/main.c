@@ -2,17 +2,6 @@
 #define NDEBUG
 #include "headers/all.h"
 
-// STB Image
-#ifdef TCC
-#define STBI_NO_SIMD
-#endif
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_MALLOC mem_alloc
-#define STBI_REALLOC mem_realloc
-#define STBI_FREE mem_free
-#define STBI_ASSERT assert
-#include <stb_image.h>
-
 struct GameGlobalState game = { 0 };
 
 internal u64 hash_of(const char* restrict str) {
@@ -37,6 +26,9 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 	args->height = 720;
 	args->fullscreen = false;
 	args->novsync = false;
+	args->locale = 0;
+	
+	// debug_log("%llu\n", hash_of("locale"));
 	
 	// Parse arguments
 	for (uint i = 1; i < argc; ++i) {
@@ -56,6 +48,7 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 		switch (hash) {
 			case 3298519710295134399ull: __write_field(width, "%u"); break;
 			case 14734894603901239938ull: __write_field(height, "%u"); break;
+			case 2222796463784432279ull: __write_field(locale, "%u"); break;
 			case 3748217411440170462ull: // fs
 			case 17893791189687017496ull: __write_flag(fullscreen, true); break;
 			case 16136394061700334151ull: __write_flag(novsync, true); break;

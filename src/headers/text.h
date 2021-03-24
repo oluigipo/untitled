@@ -1,5 +1,4 @@
 #pragma once
-
 #include "types.h"
 #include "std.h"
 #include "texture.h"

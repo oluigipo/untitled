@@ -1,5 +1,4 @@
 #pragma once
-
 #include "types.h"
 #include "opengl.h"
 #include "memory.h"
@@ -43,6 +42,7 @@ struct GameArgs {
 	usize mem;
 	uint width;
 	uint height;
+	uint locale;
 	b8 fullscreen;
 	b8 novsync;
 };
