@@ -62,7 +62,7 @@ uint scene_main(void) {
 		.pos = { 0, 0 },
 		.angle = 0,
 		.zoom = 2,
-		.speed = 0
+		.speed = 3.0f
 	};
 	
 	// Music
@@ -71,6 +71,7 @@ uint scene_main(void) {
 	
 	sound_source_buffer(source, buffer);
 	sound_play_source(source);
+	sound_source_attenuation(source, 1.0f, 300.0f, 1000000.0f);
 	
 	b32 playingSound = true;
 	
@@ -79,16 +80,14 @@ uint scene_main(void) {
 		engine_begin_frame();
 		
 		// Update
-		if (keyboard_is_pressed(GLFW_KEY_TAB)) {
+		if (gamepad_is_pressed(GPAD_BUTTON_Y)) {
 			playingSound = !playingSound;
 			
-			if (playingSound)
-				sound_play_source(source);
-			else
-				sound_pause_source(source);
+			if (playingSound) sound_play_source(source);
+			else sound_pause_source(source);
 		}
 		
-		if (keyboard_is_pressed(GLFW_KEY_ESCAPE))
+		if (gamepad_is_pressed(GPAD_BUTTON_START))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
 		f32 targetSpeed = 3.0f + 2.0f * gamepad_axis(GPAD_AXIS_R2);
@@ -116,9 +115,12 @@ uint scene_main(void) {
 						});
 		}
 		
+		sound_source_position(source, (vec3) { position[0], position[1], -300.0f });
+		
 		partmgr_update(&mgr);
 		
 		mat4 view;
+		camera_update(&camera);
 		camera_matrix(&camera, view);
 		
 		// Draw

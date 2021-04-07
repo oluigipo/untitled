@@ -40,6 +40,16 @@ void os_assertion_failure(const char* restrict what) {
 	exit(1);
 }
 
+void os_switch_software_rendering(void) {
+	if (game.renderer == 0) {
+		system("ren ./_opengl32.dll opengl32.dll");
+	} else {
+		system("ren ./opengl32.dll _opengl32.dll");
+	}
+	
+	game.renderer ^= 1;
+}
+
 //~ Linux Stuff
 #elif defined(OS_LINUX)
 #include <time.h>
@@ -71,6 +81,11 @@ void os_assertion_failure(const char* restrict what) {
 #endif
 	
 	exit(1);
+}
+
+void os_switch_software_rendering(void) {
+	// TODO(luigi): support for linux
+	game.renderer = 0;
 }
 
 #endif

@@ -13,6 +13,18 @@
 #include <math.h>
 #include <time.h>
 
+#ifdef MSVC
+#  define likely(x) x
+#  define unlikely(x) x
+#else
+#  define likely(x) __builtin_expect((x) != 0, true)
+#  define unlikely(x) __builtin_expect((x) != 0, false)
+#endif
+
+#define gigabytes(x) (megabytes(x) * 1024ull)
+#define megabytes(x) (kilobytes(x) * 1024ull)
+#define kilobytes(x) ((u64)(x) * 1024ull)
+
 /// Structs
 // A range of characters in memory. Not necessarily null-terminated.
 typedef struct string {
@@ -48,6 +60,10 @@ internal inline f32 lerpf(f32 a, f32 b, f32 t) {
 internal inline f32 lerp(f64 a, f64 b, f64 t) {
 	return (b - a) * t + a;
 }
+
+// Hashing. Both of them are case insensetive.
+u64 hash_of_cstr(const char* str);
+u64 hash_of_str(string str);
 
 /// string
 string string_from_cstr_len(const char* restrict ptr, usize len);

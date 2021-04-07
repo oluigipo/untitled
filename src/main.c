@@ -4,31 +4,16 @@
 
 struct GameGlobalState game = { 0 };
 
-internal u64 hash_of(const char* restrict str) {
-	u64 hash = 2166136261ull;
-	
-	while (*str) {
-		u8 value = (u64)*str++;
-		if (value > 0b01100000)
-			value &=~ 0b00100000;
-		
-		hash ^= value;
-		hash *= 16777619ull;
-	}
-	
-	return hash;
-}
-
 internal void parse_args(struct GameArgs* restrict args, uint argc, const char* restrict* restrict argv) {
 	// Default values
-	args->mem = 1024 * 1024;
-	args->width = 1280;
-	args->height = 720;
-	args->fullscreen = false;
-	args->novsync = false;
-	args->locale = 0;
+	args->mem = megabytes(8);
+	args->width = 0;
+	args->height = 0;
+	args->fullscreen = -1;
+	args->novsync = 0;
+	args->locale = -1;
 	
-	// debug_log("%llu\n", hash_of("locale"));
+	// debug_log("%llu\n", hash_of_cstr("locale"));
 	
 	// Parse arguments
 	for (uint i = 1; i < argc; ++i) {
@@ -39,7 +24,7 @@ internal void parse_args(struct GameArgs* restrict args, uint argc, const char* 
 			continue;
 		}
 		
-		u64 hash = hash_of(arg + 1); // ignore first character
+		u64 hash = hash_of_cstr(arg + 1); // ignore first character
 		
 #define __write_field(field, format) \
 do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to %u.\n", argv[i], args->field); break; } ++i; arg = argv[i]; sscanf(arg, (format), &args->field); } while (0)
@@ -67,7 +52,7 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 				sscanf(arg, "%zu", &s);
 				
 				if (s < args->mem) {
-					debug_error("Argument for '-mem' shall be greater than the default value %zu. Ignoring flag.\n", args->mem);
+					debug_error("Argument for '-mem' shall be greater than %u. Ignoring flag.\n", megabytes(1));
 					
 					break;
 				}
@@ -102,6 +87,10 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 
 //~ Main Function
 int main(int argc, char* argv[]) {
+	// Main things setup
+	setvbuf(stdout, NULL, _IONBF, 0);
+	
+	// Initialize game.
 	struct GameArgs args;
 	parse_args(&args, (uint)argc, (void*)argv);
 	

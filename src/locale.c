@@ -1,6 +1,6 @@
 #include "headers/locale.h"
 #include "headers/memory.h"
-#if TCC
+#if defined(TCC) || defined(MSVC)
 #include <dirent_imp.h>
 #else
 #include <dirent.h>

@@ -44,9 +44,9 @@ void sound_listener_position(const vec3 pos) {
 uint sound_load_file(const char* fname) {
 	int channels, sampleRate;
 	i16* data;
-	int size = stb_vorbis_decode_filename(fname, &channels, &sampleRate, &data);
+	int sampleCount = stb_vorbis_decode_filename(fname, &channels, &sampleRate, &data);
 	
-	if (size == -1) {
+	if (sampleCount == -1) {
 		debug_log("something went wrong...\n");
 		return 0;
 	}
@@ -57,11 +57,13 @@ uint sound_load_file(const char* fname) {
 	else if (channels == 2)
 		format = AL_FORMAT_STEREO16;
 	
+	isize size = (isize)sampleCount * (isize)channels * sizeof (*data);
+	
 	uint bufferId;
 	alGenBuffers(1, &bufferId);
 	alBufferData(bufferId, format, data, size, sampleRate);
 	
-	int err = alGetError();
+	ALenum err = alGetError();
     if(err != AL_NO_ERROR)
     {
         debug_error("OpenAL Error: %s\n", alGetString(err));

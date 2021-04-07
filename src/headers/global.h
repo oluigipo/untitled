@@ -2,6 +2,7 @@
 #include "types.h"
 #include "opengl.h"
 #include "memory.h"
+#include "options.h"
 
 #define FPS_DEFAULT 60
 
@@ -9,12 +10,13 @@ typedef uint (*__scene_t)(void);
 typedef __scene_t Scene;
 
 struct GameGlobalState {
-	
 	// Game Window
 	GLFWwindow* apiWindow;
 	struct GameWindowState {
 		uint width, height;
 	} window;
+	b32 vsyncEnabled;
+	u32 renderer;
 	
 	// Game Scene
 	Scene currentScene;

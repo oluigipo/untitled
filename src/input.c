@@ -93,7 +93,7 @@ void input_update(void) {
 }
 
 void input_map_to_gamepad(void) {
-	// TODO(luigi): convert input from the keyboard to gamepad. Higher density of relevant data.
+	// TODO(luigi): convert input from the keyboard to gamepad.
 	gamepad.state = (GLFWgamepadstate) { 0 };
 	
 	gamepad.state.axes[GPAD_AXIS_LX] = keyboard_is_down(GLFW_KEY_D) - keyboard_is_down(GLFW_KEY_A);
@@ -110,8 +110,12 @@ void input_map_to_gamepad(void) {
 	
 	gamepad.state.buttons[GPAD_BUTTON_RIGHT] = keyboard_is_down(GLFW_KEY_RIGHT);
 	gamepad.state.buttons[GPAD_BUTTON_LEFT] = keyboard_is_down(GLFW_KEY_LEFT);
+	gamepad.state.buttons[GPAD_BUTTON_UP] = keyboard_is_down(GLFW_KEY_UP);
+	gamepad.state.buttons[GPAD_BUTTON_DOWN] = keyboard_is_down(GLFW_KEY_DOWN);
 	gamepad.state.buttons[GPAD_BUTTON_A] = keyboard_is_down(GLFW_KEY_SPACE);
 	gamepad.state.buttons[GPAD_BUTTON_B] = keyboard_is_down(GLFW_KEY_LEFT_SHIFT);
+	gamepad.state.buttons[GPAD_BUTTON_Y] = keyboard_is_down(GLFW_KEY_TAB);
+	gamepad.state.buttons[GPAD_BUTTON_START] = keyboard_is_down(GLFW_KEY_ESCAPE);
 }
 
 int input_check_for_gamepad(void) {
@@ -122,5 +126,4 @@ int input_check_for_gamepad(void) {
 	
 	return -1;
 }
-
 

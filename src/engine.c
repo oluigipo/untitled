@@ -11,7 +11,15 @@ internal void glfwcallback_window_resize(GLFWwindow* window, int width, int heig
 }
 
 uint engine_init(const struct GameArgs* restrict args) {
-	if (!glfwInit()) {
+	// Load options
+	options_load();
+	
+	if (args->width) game.window.width = args->width;
+	if (args->height) game.window.height = args->height;
+	if (args->novsync) game.vsyncEnabled = false;
+	
+	// Load GLFW
+	if (unlikely(!glfwInit())) {
 		printf("Failed to initialize GLFW.\nExiting.");
 		return 1;
 	}
@@ -20,9 +28,9 @@ uint engine_init(const struct GameArgs* restrict args) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
-	GLFWwindow* window = glfwCreateWindow(args->width, args->height, "game", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(game.window.width, game.window.height, "game", NULL, NULL);
 	if (!window) {
-		printf("Couldn't initialize window.\nExiting.");
+		debug_error("Couldn't initialize window.\nExiting.");
 		glfwTerminate();
 		return 1;
 	}
@@ -30,13 +38,11 @@ uint engine_init(const struct GameArgs* restrict args) {
 	glfwMakeContextCurrent(window);
 	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	
-	glfwSwapInterval(!args->novsync);
-	
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	glfwSetWindowPos(window, mode->width / 2 - args->width / 2, mode->height / 2 - args->height / 2);
+	glfwSetWindowPos(window, mode->width / 2 - game.window.width / 2, mode->height / 2 - game.window.height / 2);
 	
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		printf("Could not load OpenGL functions.\nExiting.");
+		debug_error("Could not load OpenGL functions.\nExiting.");
 		glfwTerminate();
 		return 1;
 	}
@@ -44,13 +50,12 @@ uint engine_init(const struct GameArgs* restrict args) {
 	glfwSetWindowSizeCallback(window, glfwcallback_window_resize);
 	
 	game.apiWindow = window;
-	game.window.width = args->width;
-	game.window.height = args->height;
 	game.lastFrame = glfwGetTime();
 	game.framebufferStackSize = 1;
 	game.shaderStackSize = 1;
 	
 	// Init some other things
+	glfwSwapInterval(game.vsyncEnabled);
 	stack_init(&game.frameStack, args->mem);
 	input_init();
 	stbi_set_flip_vertically_on_load(true);
@@ -65,7 +70,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	//debug(random_test());
 	
 	// Initialize OpenGL things
-	glfwcallback_window_resize(window, args->width, args->height);
+	glfwcallback_window_resize(window, game.window.width, game.window.height);
 	
 	glEnable(GL_BLEND);
 	// glEnable(GL_CULL_FACE);
@@ -119,6 +124,7 @@ void engine_end_frame(void) {
 }
 
 void engine_deinit(void) {
+	options_save();
 	texture_free_assets();
 	locale_deinit();
 	sound_deinit();

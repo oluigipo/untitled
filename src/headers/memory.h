@@ -1,13 +1,16 @@
 #pragma once
 #include "types.h"
 
+// NOTE(luigi): if any memory allocation with those functions fail, a message
+//              box will popup to the user telling what occured, and then exit
+//              the application.
 void* mem_alloc(usize size);
 void* mem_alloc_zero(usize count, usize size);
 void* mem_realloc(void* p, usize size);
 void* mem_reallod_zero(void* p, usize count, usize size);
 void mem_free(void* p);
 
-// Arena Allocator
+//~ Arena Allocator
 typedef struct Arena Arena;
 struct Arena {
 	usize head;
@@ -21,7 +24,7 @@ void* arena_alloc(Arena* restrict arena, usize size);
 void* arena_alloc_zero(Arena* restrict arena, usize size);
 void arena_clear(Arena* restrict arena);
 
-// Stack Allocator
+//~ Stack Allocator
 typedef struct Stack Stack;
 struct Stack {
 	usize size;
@@ -44,7 +47,7 @@ void stack_free(Stack* stack, void* ptr);
 void stack_pop(Stack* stack);
 void stack_clear(Stack* stack);
 
-// Pool Allocator
+//~ Pool Allocator
 typedef struct MemoryPool MemoryPool;
 struct MemoryPool {
 	usize count;

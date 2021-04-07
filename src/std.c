@@ -1,5 +1,36 @@
 #include "headers/std.h"
 
+u64 hash_of_cstr(const char* str) {
+	u64 hash = 2166136261ull;
+	
+	while (*str) {
+		u8 value = (u64)*str++;
+		if (value > 0b01100000)
+			value &=~ 0b00100000;
+		
+		hash ^= value;
+		hash *= 16777619ull;
+	}
+	
+	return hash;
+}
+
+u64 hash_of_str(string str) {
+	u64 hash = 2166136261ull;
+	usize i = 0;
+	
+	while (i < str.len) {
+		u8 value = (u64)str.ptr[i++];
+		if (value > 0b01100000)
+			value &=~ 0b00100000;
+		
+		hash ^= value;
+		hash *= 16777619ull;
+	}
+	
+	return hash;
+}
+
 internal usize usize_min(usize a, usize b) {
 	if (a > b)
 		return b;

@@ -37,3 +37,15 @@ usize file_dump(const char* restrict fname, char** restrict out) {
 	return len;
 }
 
+usize file_read_line(FILE* file, char* buffer, usize limit) {
+	usize len = 0;
+	char c;
+	
+	while (len+1 < limit && (c = fgetc(file)) != '\n' && c != EOF) {
+		buffer[len++] = c;
+	}
+	
+	buffer[len] = 0;
+	
+	return len;
+}

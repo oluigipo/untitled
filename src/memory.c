@@ -2,27 +2,46 @@
 #include <stdlib.h>
 #include <memory.h>
 #include "headers/debug.h"
+#include "headers/os.h"
 
 //#define MEM_TRACK_HEAP_ALLOCATIONS
 
 void* mem_alloc(usize size) {
 	void* ptr = malloc(size);
+	
+	if (unlikely(!ptr)) {
+		os_message_box("Not enough memory!", "A memory allocation failed to be done. The program will terminate.");
+		exit(1);
+	}
+	
 #ifdef MEM_TRACK_HEAP_ALLOCATIONS
-	printf("Allocation Tracking: mem_alloc(%zu) -> %p\n", size, ptr);
+	debug_log("Allocation Tracking: mem_alloc(%zu) -> %p\n", size, ptr);
 #endif
 	return ptr;
 }
 
 void* mem_alloc_zero(usize count, usize size) {
 	void* ptr = calloc(count, size);
+	
+	if (unlikely(!ptr)) {
+		os_message_box("Not enough memory!", "A memory allocation failed to be done. The program will terminate.");
+		exit(1);
+	}
+	
 #ifdef MEM_TRACK_HEAP_ALLOCATIONS
-	printf("Allocation Tracking: mem_alloc_zero(%zu, %zu) -> %p\n", count, size, ptr);
+	debug_log("Allocation Tracking: mem_alloc_zero(%zu, %zu) -> %p\n", count, size, ptr);
 #endif
 	return ptr;
 }
 
 void* mem_realloc(void* p, usize size) {
 	void* ptr = realloc(p, size);
+	
+	if (unlikely(!ptr)) {
+		os_message_box("Not enough memory!", "A memory allocation failed to be done. The program will terminate.");
+		exit(1);
+	}
+	
 #ifdef MEM_TRACK_HEAP_ALLOCATIONS
 	printf("Allocation Tracking: mem_realloc(%p, %zu) -> %p\n", p, size, ptr);
 #endif
@@ -32,6 +51,11 @@ void* mem_realloc(void* p, usize size) {
 void* mem_realloc_zero(void* p, usize count, usize size) {
 	assert(!"mem_realloc_zero() doesn't have an implementation.");
 	void* ptr = NULL;
+	
+	if (unlikely(!ptr)) {
+		os_message_box("Not enough memory!", "A memory allocation failed to be done. The program will terminate.");
+		exit(1);
+	}
 	
 #ifdef MEM_TRACK_HEAP_ALLOCATIONS
 	printf("Allocation Tracking: mem_realloc_zero(%p, %zu, %zu) -> %p\n", p, count, size, ptr);

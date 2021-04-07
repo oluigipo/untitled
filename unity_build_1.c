@@ -14,6 +14,7 @@
 #include "texture.c"
 #include "particles.c"
 #include "sound.c"
+#include "options.c"
 #include "scenes/main_scene.c"
 
 #include "std.c"
