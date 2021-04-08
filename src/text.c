@@ -162,7 +162,6 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	framebuffer_unbind();
 	*output = framebuffer_extract(&target);
 	
-	__exit:;
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	stack_pop(&game.frameStack);

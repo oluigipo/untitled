@@ -43,7 +43,7 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 				++i;
 				arg = argv[i];
 				if (!arg) {
-					debug_error("Missing value for argument '-mem'. Default to %zu.\n", args->mem);
+					debug_error("Missing value for argument '-mem'. Default to %llu.\n", args->mem);
 					
 					break;
 				}
@@ -52,7 +52,7 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 				sscanf(arg, "%zu", &s);
 				
 				if (s < args->mem) {
-					debug_error("Argument for '-mem' shall be greater than %u. Ignoring flag.\n", megabytes(1));
+					debug_error("Argument for '-mem' shall be greater than %llu. Ignoring flag.\n", megabytes(1));
 					
 					break;
 				}

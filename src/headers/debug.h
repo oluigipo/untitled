@@ -22,16 +22,16 @@
 //~
 #else // ifdef DEBUG
 
-#define debug(code) 0
+#define debug(code)
 #define debug_noscope(code) 
 
 #define debug_log debug_print
-#define debug_print(...) 0
-#define debug_error(...) 0
+#define debug_print(...)
+#define debug_error(...)
 
 #define debug_profile(name) if (true)
 
-#define assert(cond) 0
+#define assert(cond)
 
 //~
 #endif // else ifdef DEBUG

@@ -1,12 +1,6 @@
 #include "headers/particles.h"
 #include "headers/opengl.h"
 
-internal u32 u32_min(u32 a, u32 b) {
-	if (a > b)
-		return b;
-	return a;
-}
-
 #define partmgr_add_template(T, field) do {\
 u32 index = mgr->field.count < MAX_PARTICLE_COUNT ? mgr->field.count++ : (random_u32() & (MAX_PARTICLE_COUNT-1));\
 mgr->field.data[index] = partData ? *(T*)partData : (T) { 0 };\

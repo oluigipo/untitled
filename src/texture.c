@@ -51,7 +51,7 @@ void texture_load_assets(void) {
 			glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
 			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, height);
 			
-			for (int y = 0; y < subheight; ++y) {
+			for (uint y = 0; y < subheight; ++y) {
 				for (uint x = 0; x < subwidth; ++x) {
 					// printf("p: %u, %u\n", x, y);
 					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
