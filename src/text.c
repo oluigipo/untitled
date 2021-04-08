@@ -76,13 +76,6 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 		glBindVertexArray(vao);
 	}
 	
-	uint texture;
-	
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	
 	// Allocate vertex buffer data
 	usize bufferLen = text.len * sizeof(struct TextVertexInfo);
 	void* heapBuffer = stack_push(&game.frameStack, bufferLen);
@@ -146,24 +139,11 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof vertices, bufferLen, infos);
 	
 	// Create Framebuffer
-	uint framebuffer;
-	
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-	
-	uint result = 0;
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		// panic
-		debug_error("Could not complete framebuffer for rendering the text.\n");
-		result = 1;
-		goto __exit;
-	}
+	Framebuffer target;
+	framebuffer_init(&target, (vec2u) { width, height });
 	
 	// Render text to framebuffer
-	glViewport(0.0f, 0.0f, width, height);
+	framebuffer_bind(&target);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
@@ -179,21 +159,15 @@ uint text_render(struct Texture* restrict output, string text, const uint* restr
 	shader_unbind();
 	
 	// Finish
-	output->id = texture;
-	output->size[0] = width;
-	output->size[1] = height;
-	output->depth = 0;
+	framebuffer_unbind();
+	*output = framebuffer_extract(&target);
 	
 	__exit:;
-	glDeleteFramebuffers(1, &framebuffer);
-	
-	glBindFramebuffer(GL_FRAMEBUFFER, game.framebufferStack[game.framebufferStackSize-1]);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-	glViewport(0, 0, game.window.width, game.window.height);
 	stack_pop(&game.frameStack);
 	
-	return result; // success
+	return 0; // success
 }
 
 void text_size(string text, vec2u out, const struct Texture* restrict font) {

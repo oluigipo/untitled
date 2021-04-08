@@ -51,7 +51,7 @@ uint scene_main(void) {
 	}
 	
 	// Walle things
-	vec2 position = { 0, 0 };
+	vec2 position = { 0 };
 	vec2 velocity = { 0 };
 	
 	// Particles
@@ -97,11 +97,6 @@ uint scene_main(void) {
 		position[0] += velocity[0] * game.deltaTime;
 		position[1] += velocity[1] * game.deltaTime;
 		
-		glm_mat4_identity(object);
-		glm_translate(object, (vec3) { position[0], position[1] });
-		glm_scale(object, (vec3) { assets_textures[TEX_WALLE].size[0], assets_textures[TEX_WALLE].size[1] });
-		glm_translate(object, (vec3) { -0.5f, -0.5f });
-		
 		if (gamepad_is_down(GPAD_BUTTON_A)) {
 			f32 scale = random_f64() * 0.5f + 0.5f;
 			
@@ -135,6 +130,11 @@ uint scene_main(void) {
 		
 		shader_bind(shader);
 		
+		glm_mat4_identity(object);
+		glm_translate(object, (vec3) { position[0], position[1] });
+		glm_scale(object, (vec3) { assets_textures[TEX_WALLE].size[0], assets_textures[TEX_WALLE].size[1] });
+		glm_translate(object, (vec3) { -0.5f, -0.5f });
+		
 		glUniform1i(uniformTex, 0);
 		glUniformMatrix4fv(uniformView, 1, false, (f32*)view);
 		glUniformMatrix4fv(uniformObj, 1, false, (f32*)object);
@@ -157,6 +157,11 @@ uint scene_main(void) {
 		partmgr_render(&mgr, view);
 		
 		engine_end_frame();
+		
+		uint err;
+		while (err = glGetError(), err != GL_NO_ERROR) {
+			debug_error("GL Error: %u\n", err);
+		}
 	}
 	
 	glDeleteBuffers(1, &vbo);

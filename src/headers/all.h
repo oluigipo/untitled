@@ -1,5 +1,3 @@
-#pragma once
-
 #include "headers/std.h"
 #include "headers/global.h"
 #include "headers/memory.h"
@@ -20,3 +18,4 @@
 #include "headers/shapes.h"
 #include "headers/camera.h"
 #include "headers/sound.h"
+#include "headers/framebuffer.h"

@@ -6,13 +6,24 @@
 #include <glfw3native.h>
 #endif
 
+internal void game_update_projection_matrix(void) {
+	glm_mat4_identity(game.projection);
+	glm_scale(game.projection, (vec3) { 1.0f / (game.framebuffer.tex.size[0]/2.0f), 1.0f / -(game.framebuffer.tex.size[1]/2.0f) });
+	//glm_ortho(-(f32)game.framebuffer.tex.size[0]/2, (f32)game.framebuffer.tex.size[0]/2, (f32)game.framebuffer.tex.size[1]/2, -(f32)game.framebuffer.tex.size[1]/2, -1.0f, 1.0f, game.projection);
+}
+
 internal void glfwcallback_window_resize(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
+	debug_log("Window Resized: %ix%i\n", width, height);
+	
 	game.window.width = (uint)width;
 	game.window.height = (uint)height;
 	
-	glm_mat4_identity(game.projection);
-	glm_ortho((f32)-width/2, (f32)width/2, (f32)height/2, (f32)-height/2, -1.0f, 1.0f, game.projection);
+	framebuffer_resize(&game.framebuffer, (vec2u) { (uint)width, (uint)height });
+	if (game.framebufferStackSize == 1) {
+		glViewport(0, 0, game.framebuffer.tex.size[0], game.framebuffer.tex.size[1]);
+	}
+	
+	game_update_projection_matrix();
 }
 
 internal void glfwcallback_error_handler(int code, const char* name) {
@@ -74,7 +85,6 @@ uint engine_init(const struct GameArgs* restrict args) {
 	
 	game.apiWindow = window;
 	game.lastFrame = glfwGetTime();
-	game.framebufferStackSize = 1;
 	game.shaderStackSize = 1;
 	
 	// Init some other things
@@ -93,12 +103,39 @@ uint engine_init(const struct GameArgs* restrict args) {
 	//debug(random_test());
 	
 	// Initialize OpenGL things
-	glfwcallback_window_resize(window, game.window.width, game.window.height);
-	
 	glEnable(GL_BLEND);
 	// glEnable(GL_CULL_FACE);
-	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	framebuffer_init(&game.framebuffer, (vec2u) { game.window.width, game.window.height });
+	framebuffer_bind(&game.framebuffer);
+	
+	game_update_projection_matrix();
+	
+	game.fbShader = shader_load("res/window");
+	game.fbShaderTex = shader_uniform(game.fbShader, "uTexture");
+	
+	f32 vertices[] = {
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 1.0f,
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f
+	};
+	
+	glGenBuffers(1, &game.fbVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, game.fbVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
+	
+	glGenVertexArrays(1, &game.fbVAO);
+	glBindVertexArray(game.fbVAO);
+	
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, false, sizeof(f32) * 2, (void*)0);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 	
 	return 0;
 }
@@ -106,6 +143,9 @@ uint engine_init(const struct GameArgs* restrict args) {
 void engine_begin_frame(void) {
 	game.frameBegin = glfwGetTime();
 	game.deltaTime = (game.frameBegin - game.lastFrame) * FPS_DEFAULT;
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, game.framebuffer.id);
+	glViewport(0, 0, game.framebuffer.tex.size[0], game.framebuffer.tex.size[1]);
 	
 	// NOTE(luigi): glfwPollEvents(void) is inside input_update(void).
 	//              mouse input is 1 frame behind VS oldKeys not working.
@@ -125,6 +165,22 @@ void engine_end_frame(void) {
 		stack_clear(&game.frameStack);
 	}
 	
+	// Draw framebuffer to screen
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, game.window.width, game.window.height);
+	
+	shader_bind(game.fbShader);
+	glUniform1i(game.fbShaderTex, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, game.framebuffer.tex.id);
+	
+	glBindVertexArray(game.fbVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+	
+	shader_unbind();
+	
+	// Debug things
 	debug({
 			  static f64 sumTotal = 0;
 			  static f64 sumWasted = 0;
@@ -133,20 +189,21 @@ void engine_end_frame(void) {
 			  sumTotal += now - game.lastFrame;
 			  sumWasted += now - game.frameBegin;
 			  
-			  if (sumTotal > 1.0) {
+			  if (sumTotal >= 1.0) {
 				  debug_print("Average Frame Time: %f ms\n", sumWasted / FPS_DEFAULT * 1000);
 				  sumTotal -= 1;
 				  sumWasted = 0;
 			  }
 		  });
 	
-	game.lastFrame = game.frameBegin;
-	
 	// Vsync and swap chain
+	game.lastFrame = game.frameBegin;
 	glfwSwapBuffers(game.apiWindow);
 }
 
 void engine_deinit(void) {
+	game.framebufferStackSize = 0;
+	framebuffer_deinit(&game.framebuffer);
 	options_save();
 	texture_free_assets();
 	locale_deinit();

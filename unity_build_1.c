@@ -15,6 +15,7 @@
 #include "particles.c"
 #include "sound.c"
 #include "options.c"
+#include "framebuffer.c"
 #include "scenes/main_scene.c"
 
 #include "std.c"

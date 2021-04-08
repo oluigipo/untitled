@@ -7,9 +7,6 @@ struct TextureLoadInfo {
 	
 	union {
 		struct {
-#if 0
-			______something;
-#endif
 			uint tileWidth, tileHeight;
 		};
 		vec2u tileSize;

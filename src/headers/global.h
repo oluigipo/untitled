@@ -3,6 +3,7 @@
 #include "opengl.h"
 #include "memory.h"
 #include "options.h"
+#include "framebuffer.h"
 
 #define FPS_DEFAULT 60
 
@@ -31,10 +32,15 @@ struct GameGlobalState {
 	f64 frameBegin; // Time when the current frame started (seconds)
 	
 	// Screen
+	Framebuffer framebuffer;
+	uint fbShader;
+	uint fbShaderTex;
+	uint fbVAO;
+	uint fbVBO;
 	mat4 projection;
 	
 	// Global stacks
-	uint framebufferStack[16]; // The first index should always be 0.
+	Framebuffer* framebufferStack[16]; // The first index should always be 0.
 	uint framebufferStackSize; // The stack will init at 1.
 	uint shaderStack[16]; //     /\ Same for all stacks.
 	uint shaderStackSize;
