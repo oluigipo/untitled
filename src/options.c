@@ -86,6 +86,7 @@ void options_load(void) {
 				case 10905049475048401944ull: sscanf(buffer + head, "%u", &game.window.width); break;
 				case 11748157869929321231ull: sscanf(buffer + head, "%u", &game.window.height); break;
 				case 16059922302271978957ull: sscanf(buffer + head, "%u", &game.vsyncEnabled); break;
+				//case 9298201933543872523ull: sscanf(buffer + head, "%u", &game.renderer); break;
 				
 				// NOTE(luigi): no need for warning in unknown field (maybe?)
 				default: break;
@@ -112,11 +113,13 @@ void options_save(void) {
 	fprintf(file, "width=%u\n", game.window.width);
 	fprintf(file, "height=%u\n", game.window.height);
 	fprintf(file, "vsync=%u\n", game.vsyncEnabled);
+	//fprintf(file, "renderer=%u\n", game.renderer);
 }
 
 void options_reset(void) {
 	game.window.width = 1280;
 	game.window.height = 720;
 	game.vsyncEnabled = true;
+	//game.renderer = 0;
 }
 

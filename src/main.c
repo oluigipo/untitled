@@ -87,18 +87,20 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 
 //~ Main Function
 int main(int argc, char* argv[]) {
+	struct GameArgs args;
+	uint result;
+	
 	// Main things setup
 	setvbuf(stdout, NULL, _IONBF, 0);
 	
 	// Initialize game.
-	struct GameArgs args;
 	parse_args(&args, (uint)argc, (void*)argv);
 	
-	uint result = engine_init(&args);
+	result = engine_init(&args);
 	if (result != 0)
 		return result;
 	
-	game.currentScene = scene_main;
+	game.currentScene = FIRST_SCENE;
 	do {
 		result = game.currentScene();
 	} while (game.currentScene && result == 0);

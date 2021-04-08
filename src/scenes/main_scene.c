@@ -71,7 +71,7 @@ uint scene_main(void) {
 	
 	sound_source_buffer(source, buffer);
 	sound_play_source(source);
-	sound_source_attenuation(source, 1.0f, 300.0f, 1000000.0f);
+	sound_source_attenuation(source, 1.0f, 300.0f, 10000.0f);
 	
 	b32 playingSound = true;
 	

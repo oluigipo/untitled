@@ -16,7 +16,10 @@ struct GameGlobalState {
 		uint width, height;
 	} window;
 	b32 vsyncEnabled;
-	u32 renderer;
+	i32 refreshRate;
+	
+	// NOTE(luigi): maybe we are going to support software rendering using MESA's software implementation of OpenGL? well, first we need to be able to bind GDI32.dll to mesa_opengl32.dll at runtime, which isn't possible at the moment.
+	//u32 renderer; // 0 = normal, 1 = software (windows only)
 	
 	// Game Scene
 	Scene currentScene;

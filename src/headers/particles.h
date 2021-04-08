@@ -4,12 +4,12 @@
 // NOTE(luigi): this should be a power of two
 #define MAX_PARTICLE_COUNT 128
 
-typedef enum ParticleKind ParticleKind;
 enum ParticleKind {
 	PART_SIMPLE,
 	
 	PART__COUNT
 };
+typedef enum ParticleKind ParticleKind;
 
 struct PartSimple {
 	vec2 pos;

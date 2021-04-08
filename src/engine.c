@@ -1,6 +1,11 @@
 #include "headers/all.h"
 #include <stb_image.h>
 
+#if defined(OS_WINDOWS) && !(defined(TCC) || defined(MSVC))
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <glfw3native.h>
+#endif
+
 internal void glfwcallback_window_resize(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 	game.window.width = (uint)width;
@@ -8,6 +13,10 @@ internal void glfwcallback_window_resize(GLFWwindow* window, int width, int heig
 	
 	glm_mat4_identity(game.projection);
 	glm_ortho((f32)-width/2, (f32)width/2, (f32)height/2, (f32)-height/2, -1.0f, 1.0f, game.projection);
+}
+
+internal void glfwcallback_error_handler(int code, const char* name) {
+	debug_error("GLFW Error %i: %s\n", code, name);
 }
 
 uint engine_init(const struct GameArgs* restrict args) {
@@ -18,31 +27,45 @@ uint engine_init(const struct GameArgs* restrict args) {
 	if (args->height) game.window.height = args->height;
 	if (args->novsync) game.vsyncEnabled = false;
 	
+#if defined(OS_WINDOWS) && !(defined(TCC) || defined(MSVC))
+	// NOTE(luigi): this is a modification I made on GLFW.
+	// NOTE(luigi): we won't use it. See 'headers/global.h' for context.
+	
+	//if (game.renderer != 0) // if should use software rendering
+	//glfwSetWin32LibraryName("mesa_opengl32.dll");
+#endif
+	
 	// Load GLFW
 	if (unlikely(!glfwInit())) {
-		printf("Failed to initialize GLFW.\nExiting.");
+		printf("Failed to initialize GLFW.\nExiting.\n");
 		return 1;
 	}
+	
+	glfwSetErrorCallback(glfwcallback_error_handler);
 	
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, false);
 	
 	GLFWwindow* window = glfwCreateWindow(game.window.width, game.window.height, "game", NULL, NULL);
 	if (!window) {
-		debug_error("Couldn't initialize window.\nExiting.");
+		debug_error("Couldn't initialize window.\nExiting.\n");
 		glfwTerminate();
 		return 1;
 	}
 	
 	glfwMakeContextCurrent(window);
+	
 	// glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	
 	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	glfwSetWindowPos(window, mode->width / 2 - game.window.width / 2, mode->height / 2 - game.window.height / 2);
+	game.refreshRate = mode->refreshRate;
 	
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		debug_error("Could not load OpenGL functions.\nExiting.");
+		debug_error("Could not load OpenGL functions.\nExiting.\n");
+		glfwDestroyWindow(window);
 		glfwTerminate();
 		return 1;
 	}
@@ -112,7 +135,7 @@ void engine_end_frame(void) {
 			  
 			  if (sumTotal > 1.0) {
 				  debug_print("Average Frame Time: %f ms\n", sumWasted / FPS_DEFAULT * 1000);
-				  sumTotal = 0;
+				  sumTotal -= 1;
 				  sumWasted = 0;
 			  }
 		  });
