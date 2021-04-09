@@ -19,3 +19,4 @@
 #include "headers/camera.h"
 #include "headers/sound.h"
 #include "headers/framebuffer.h"
+#include "headers/discord.h"

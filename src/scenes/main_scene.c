@@ -158,10 +158,12 @@ uint scene_main(void) {
 		
 		engine_end_frame();
 		
-		uint err;
-		while (err = glGetError(), err != GL_NO_ERROR) {
-			debug_error("GL Error: %u\n", err);
-		}
+		debug({
+				  uint err;
+				  while (err = glGetError(), err != GL_NO_ERROR) {
+					  debug_error("GL Error: %u\n", err);
+				  }
+			  });
 	}
 	
 	glDeleteBuffers(1, &vbo);

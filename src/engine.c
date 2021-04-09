@@ -8,8 +8,10 @@
 
 internal void game_update_projection_matrix(void) {
 	glm_mat4_identity(game.projection);
-	glm_scale(game.projection, (vec3) { 1.0f / (game.framebuffer.tex.size[0]/2.0f), 1.0f / -(game.framebuffer.tex.size[1]/2.0f) });
-	//glm_ortho(-(f32)game.framebuffer.tex.size[0]/2, (f32)game.framebuffer.tex.size[0]/2, (f32)game.framebuffer.tex.size[1]/2, -(f32)game.framebuffer.tex.size[1]/2, -1.0f, 1.0f, game.projection);
+	glm_scale(game.projection, (vec3) {
+				  1.0f /  (game.framebuffer.tex.size[0]/2.0f),
+				  1.0f / -(game.framebuffer.tex.size[1]/2.0f)
+			  });
 }
 
 internal void glfwcallback_window_resize(GLFWwindow* window, int width, int height) {
@@ -97,6 +99,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	locale_init();
 	partmgr_setup_rendering();
 	sound_init();
+	discord_init();
 	
 	currentLocale = args->locale;
 	
@@ -143,6 +146,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 void engine_begin_frame(void) {
 	game.frameBegin = glfwGetTime();
 	game.deltaTime = (game.frameBegin - game.lastFrame) * FPS_DEFAULT;
+	discord_update();
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, game.framebuffer.id);
 	glViewport(0, 0, game.framebuffer.tex.size[0], game.framebuffer.tex.size[1]);
@@ -189,9 +193,9 @@ void engine_end_frame(void) {
 			  sumTotal += now - game.lastFrame;
 			  sumWasted += now - game.frameBegin;
 			  
-			  if (sumTotal >= 1.0) {
-				  debug_print("Average Frame Time: %f ms\n", sumWasted / FPS_DEFAULT * 1000);
-				  sumTotal -= 1;
+			  if (sumTotal >= 10.0) {
+				  debug_print("Average Frame Time: %f ms\n", sumWasted / FPS_DEFAULT * 100);
+				  sumTotal -= 10;
 				  sumWasted = 0;
 			  }
 		  });
@@ -208,5 +212,6 @@ void engine_deinit(void) {
 	texture_free_assets();
 	locale_deinit();
 	sound_deinit();
+	discord_deinit();
 	glfwTerminate();
 }
