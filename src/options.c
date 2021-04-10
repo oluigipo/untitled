@@ -18,8 +18,8 @@ void options_load(void) {
 	}
 	
 	// Parse file.
-	char buffer[512];
-	char keyname[64] = { 0 };
+	unsigned char buffer[512];
+	unsigned char keyname[64] = { 0 };
 	usize sectorLength = 0;
 	usize len;
 	usize head;

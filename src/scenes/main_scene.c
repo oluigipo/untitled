@@ -48,26 +48,6 @@ uint scene_main(void) {
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(f32) * 8, (void*)(sizeof(f32) * 6));
 	
-	Texture text;
-	char myText[512];
-	char myTextEnd[] = " \x01\nThis is a sample text.";
-	usize myTextEndLen = sizeof myTextEnd;
-	
-	memcpy(myText, locale_str(TXT_HELLO_WORLD).ptr, locale_str(TXT_HELLO_WORLD).len);
-	memcpy(myText + locale_str(TXT_HELLO_WORLD).len, myTextEnd, myTextEndLen);
-	
-	string str = { .ptr = myText, .len = locale_str(TXT_HELLO_WORLD).len + myTextEndLen };
-	uint colorData[] = {
-		5, 0xFF0000,
-		8, 0x00FFFF,
-		0, 0xFFFFFF
-	};
-	
-	if (0 != text_render(&text, str, colorData, &assets_textures[TEX_DEFAULT_FONT])) {
-		debug_error("Failed.\n");
-		return 1;
-	}
-	
 	// Walle things
 	vec2 position = { 0 };
 	vec2 velocity = { 0 };
@@ -161,14 +141,20 @@ uint scene_main(void) {
 		
 		// Draw text
 		glm_mat4_identity(object);
-		glm_scale(object, (vec3) { text.size[0] * 2, text.size[1] * 2 });
-		glm_translate(object, (vec3) { -0.5f, -0.5f });
+		glm_scale(object, (vec3) { 2, 2 });
+		glm_mul(view, object, object);
 		
-		glBindTexture(GL_TEXTURE_2D, text.id);
-		glUniform1i(uniformTex, 0);
-		glUniformMatrix4fv(uniformObj, 1, false, (f32*)object);
+		unsigned char myText[512];
+		string str = { .ptr = myText };
+		str.len = snprintf(myText, sizeof myText,
+						   "%.*s \x01\n",
+						   locale_str(TXT_HELLO_WORLD).len, locale_str(TXT_HELLO_WORLD).ptr);
 		
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		str.len += snprintf(myText + str.len, sizeof(myText) - str.len,
+							(discord.connected) ? "Discord: %.*s#%u" : "Connecting to Discord...",
+							discord.username.len, discord.username.ptr, discord.discriminator);
+		
+		text_render_ext(str, object, &assets_textures[TEX_DEFAULT_FONT], NULL, TEXTRENDER_CENTER | TEXTRENDER_MIDDLE);
 		
 		shader_unbind();
 		
@@ -180,7 +166,6 @@ uint scene_main(void) {
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
 	shader_unload(shader);
-	texture_free(&text);
 	
 	sound_delete_source(source);
 	sound_unload(buffer);

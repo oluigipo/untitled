@@ -96,6 +96,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	locale_init();
 	partmgr_setup_rendering();
 	sound_init();
+	text_rendering_setup();
 	discord_init();
 	
 	if (args->locale != -1) currentLocale = args->locale;

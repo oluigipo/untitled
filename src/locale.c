@@ -12,8 +12,8 @@ uint currentLocale;
 
 internal strbuf* localesBuffer;
 
-internal char* str_jump_to(char* str, char ch) {
-	char* r = strchr(str, ch);
+internal unsigned char* str_jump_to(unsigned char* str, unsigned char ch) {
+	unsigned char* r = strchr(str, ch);
 	if (r)
 		return r;
 	return strchr(str, '\0');
@@ -62,7 +62,7 @@ void locale_init(void) {
 	localesBuffer = strbuf_make(desiredSize);
 	
 	for (usize i = 0; i < localesFiles.len; ++i) {
-		char* beginning = localesBuffer->data + localesBuffer->len;
+		unsigned char* beginning = localesBuffer->data + localesBuffer->len;
 		usize remaining = localesBuffer->cap - localesBuffer->len;
 		
 		usize read = fread(beginning, 1, remaining, localesFiles.ptr[i]);
