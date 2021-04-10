@@ -20,3 +20,4 @@
 #include "headers/sound.h"
 #include "headers/framebuffer.h"
 #include "headers/discord.h"
+#include "headers/tilemap.h"

@@ -10,7 +10,6 @@
 
 */
 
-
 uint scene_main(void) {
 	Shader shader = shader_load("res/shader");
 	
@@ -70,8 +69,27 @@ uint scene_main(void) {
 	sound_source_buffer(source, buffer);
 	sound_play_source(source);
 	sound_source_attenuation(source, 1.0f, 300.0f, 10000.0f);
+	sound_source_params(source, 0.2f, 1.0f);
 	
 	b32 playingSound = true;
+	
+	// Tilemap
+	u16 tilemapData[8*8] = {
+		0, 1, 1, 1, 1, 1, 1, 0,
+		1, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 1, 0, 0, 1, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,
+		1, 0, 1, 1, 1, 1, 0, 1,
+		1, 0, 0, 1, 1, 0, 0, 1,
+		1, 0, 0, 0, 0, 0, 0, 1,
+		0, 1, 1, 1, 1, 1, 1, 0,
+	};
+	
+	struct Tilemap tilemap = {
+		.texture = &assets_textures[TEX_TILE_DEFAULT],
+		.size = { 8, 8 },
+		.data = tilemapData
+	};
 	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
@@ -120,6 +138,12 @@ uint scene_main(void) {
 		glClearColor(0.0f, 0.6f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
+		// Draw Tilemap
+		glm_mat4_identity(object);
+		glm_scale(object, (vec3) { 16, 16 });
+		glm_mat4_mul(view, object, object);
+		tilemap_render(&tilemap, object);
+		
 		// Draw walle
 		glBindVertexArray(vao);
 		
@@ -157,7 +181,6 @@ uint scene_main(void) {
 		text_render_ext(str, object, &assets_textures[TEX_DEFAULT_FONT], NULL, TEXTRENDER_CENTER | TEXTRENDER_MIDDLE);
 		
 		shader_unbind();
-		
 		partmgr_render(&mgr, view);
 		
 		engine_end_frame();
