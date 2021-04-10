@@ -53,7 +53,7 @@ struct GameArgs {
 	usize mem;
 	uint width;
 	uint height;
-	uint locale;
+	int locale;
 	b8 fullscreen;
 	b8 novsync;
 };

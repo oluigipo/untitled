@@ -1,11 +1,6 @@
 #include "headers/all.h"
 #include <stb_image.h>
 
-#if defined(OS_WINDOWS) && !(defined(TCC) || defined(MSVC))
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <glfw3native.h>
-#endif
-
 internal void game_update_projection_matrix(void) {
 	glm_mat4_identity(game.projection);
 	glm_scale(game.projection, (vec3) {
@@ -36,6 +31,8 @@ uint engine_init(const struct GameArgs* restrict args) {
 	// Load options
 	options_load();
 	
+	//debug_log("currentLocale = %u\n", currentLocale);
+	
 	if (args->width) game.window.width = args->width;
 	if (args->height) game.window.height = args->height;
 	if (args->novsync) game.vsyncEnabled = false;
@@ -50,7 +47,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	
 	// Load GLFW
 	if (unlikely(!glfwInit())) {
-		printf("Failed to initialize GLFW.\nExiting.\n");
+		os_message_box("Fatal Error", "Failed to initialize GLFW!\nYour graphics card may support at least OpenGL 3.3 to run the game. Make sure all your drivers are up-to-date!");
 		return 1;
 	}
 	
@@ -63,7 +60,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	
 	GLFWwindow* window = glfwCreateWindow(game.window.width, game.window.height, "game", NULL, NULL);
 	if (!window) {
-		debug_error("Couldn't initialize window.\nExiting.\n");
+		os_message_box("Fatal Error", "Failed to create a new window.\nYour graphics card may support at least OpenGL 3.3 to run the game. Make sure all your drivers are up-to-date!");
 		glfwTerminate();
 		return 1;
 	}
@@ -77,7 +74,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.refreshRate = mode->refreshRate;
 	
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		debug_error("Could not load OpenGL functions.\nExiting.\n");
+		os_message_box("Fatal Error", "Could not load OpenGL functions.\nThis is strange... Is everything okay with your GPU drivers? Try updating them.");
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		return 1;
@@ -101,7 +98,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	sound_init();
 	discord_init();
 	
-	currentLocale = args->locale;
+	if (args->locale != -1) currentLocale = args->locale;
 	
 	//debug(random_test());
 	
@@ -185,20 +182,26 @@ void engine_end_frame(void) {
 	shader_unbind();
 	
 	// Debug things
-	debug({
-			  static f64 sumTotal = 0;
-			  static f64 sumWasted = 0;
-			  
-			  f64 now = glfwGetTime();
-			  sumTotal += now - game.lastFrame;
-			  sumWasted += now - game.frameBegin;
-			  
-			  if (sumTotal >= 10.0) {
-				  debug_print("Average Frame Time: %f ms\n", sumWasted / FPS_DEFAULT * 100);
-				  sumTotal -= 10;
-				  sumWasted = 0;
-			  }
-		  });
+	debug {
+		uint err;
+		while (err = glGetError(), err != GL_NO_ERROR) {
+			debug_error("GL Error: %u\n", err);
+		}
+		
+		// Frame time
+		static f64 sumTotal = 0;
+		static f64 sumWasted = 0;
+		
+		f64 now = glfwGetTime();
+		sumTotal += now - game.lastFrame;
+		sumWasted += now - game.frameBegin;
+		
+		if (sumTotal >= 10.0) {
+			debug_print("Average Frame Time: %f ms\n", sumWasted / FPS_DEFAULT * 100);
+			sumTotal -= 10;
+			sumWasted = 0;
+		}
+	}
 	
 	// Vsync and swap chain
 	game.lastFrame = game.frameBegin;

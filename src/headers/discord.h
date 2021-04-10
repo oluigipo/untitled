@@ -8,7 +8,7 @@ struct DiscordClientUser {
 	b32 connected;
 };
 
-global struct DiscordClientUser discord_user;
+global struct DiscordClientUser discord;
 
 b32 discord_init(void);
 void discord_update(void);

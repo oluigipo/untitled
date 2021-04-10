@@ -7,6 +7,8 @@ void options_load(void) {
 	// Use default values if some fields aren't present.
 	options_reset();
 	
+	//debug_log("%llu\n", hash_of_cstr("generallocale"));
+	
 	// Loading...
 	FILE* file = fopen(optionsFilePath, "r");
 	
@@ -80,6 +82,8 @@ void options_load(void) {
 			keyname[sectorLength + key.len] = 0;
 			u64 keyHash = hash_of_cstr(keyname);
 			
+			//debug_log("%s\n", keyname);
+			
 			// Match key
 			switch (keyHash) {
 				// [video]
@@ -87,6 +91,7 @@ void options_load(void) {
 				case 11748157869929321231ull: sscanf(buffer + head, "%u", &game.window.height); break;
 				case 16059922302271978957ull: sscanf(buffer + head, "%u", &game.vsyncEnabled); break;
 				//case 9298201933543872523ull: sscanf(buffer + head, "%u", &game.renderer); break;
+				case 3456656266570316237ull: sscanf(buffer + head, "%u", &currentLocale); break;
 				
 				// NOTE(luigi): no need for warning in unknown field (maybe?)
 				default: break;
@@ -109,6 +114,8 @@ void options_save(void) {
 	}
 	
 	// Write file.
+	fprintf(file, "[general]\n");
+	fprintf(file, "locale=%u\n", currentLocale);
 	fprintf(file, "[video]\n");
 	fprintf(file, "width=%u\n", game.window.width);
 	fprintf(file, "height=%u\n", game.window.height);
@@ -120,6 +127,7 @@ void options_reset(void) {
 	game.window.width = 1280;
 	game.window.height = 720;
 	game.vsyncEnabled = true;
+	currentLocale = 0;
 	//game.renderer = 0;
 }
 

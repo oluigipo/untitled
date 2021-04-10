@@ -1,4 +1,4 @@
-LIB="-I./include/linux -I./src/ -L./lib/linux -lopenal -lglfw3 -lpthread -lm -ldl -lGL -lGLU -lX11 -lcglm"
+LIB="-I./include/linux -I./src/ -L./lib/linux -ldiscord_game_sdk -lopenal -lglfw3 -lpthread -lm -ldl -lGL -lGLU -lX11 -lcglm"
 clear
 echo Compiling in Release Mode.
 echo =====================================================

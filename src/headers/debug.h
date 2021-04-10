@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "os.h"
 
-#define debug(code) do { code ;} while (0)
+#define debug if (true)
 #define debug_noscope(code) code
 
 #define debug_log debug_print
@@ -22,7 +22,7 @@
 //~
 #else // ifdef DEBUG
 
-#define debug(code)
+#define debug if (false)
 #define debug_noscope(code) 
 
 #define debug_log debug_print

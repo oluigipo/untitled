@@ -1,5 +1,16 @@
 #include "headers/all.h"
 
+/*
+
+ Game Ideas:
+- Turn-based
+- Maybe multiplayer
+- "War Groove"-kinda style
+- "pique bandeirinha"
+
+*/
+
+
 uint scene_main(void) {
 	Shader shader = shader_load("res/shader");
 	
@@ -38,7 +49,14 @@ uint scene_main(void) {
 	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(f32) * 8, (void*)(sizeof(f32) * 6));
 	
 	Texture text;
-	string str = strlit("Hello, World! \x01\nThis is a sample text.");
+	char myText[512];
+	char myTextEnd[] = " \x01\nThis is a sample text.";
+	usize myTextEndLen = sizeof myTextEnd;
+	
+	memcpy(myText, locale_str(TXT_HELLO_WORLD).ptr, locale_str(TXT_HELLO_WORLD).len);
+	memcpy(myText + locale_str(TXT_HELLO_WORLD).len, myTextEnd, myTextEndLen);
+	
+	string str = { .ptr = myText, .len = locale_str(TXT_HELLO_WORLD).len + myTextEndLen };
 	uint colorData[] = {
 		5, 0xFF0000,
 		8, 0x00FFFF,
@@ -119,7 +137,7 @@ uint scene_main(void) {
 		camera_matrix(&camera, view);
 		
 		// Draw
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.0f, 0.6f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		// Draw walle
@@ -157,13 +175,6 @@ uint scene_main(void) {
 		partmgr_render(&mgr, view);
 		
 		engine_end_frame();
-		
-		debug({
-				  uint err;
-				  while (err = glGetError(), err != GL_NO_ERROR) {
-					  debug_error("GL Error: %u\n", err);
-				  }
-			  });
 	}
 	
 	glDeleteBuffers(1, &vbo);

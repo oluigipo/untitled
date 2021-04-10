@@ -29,13 +29,13 @@
 // A range of characters in memory. Not necessarily null-terminated.
 typedef struct string {
 	usize len;
-	const char* ptr;
+	const unsigned char* ptr;
 } string;
 
 // A dynamic null-terminated buffer of characters.
 typedef struct strbuf {
 	usize cap, len;
-	char data[];
+	unsigned char data[];
 } strbuf;
 
 // Make a 'struct string' of a string literal

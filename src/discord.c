@@ -1,5 +1,7 @@
 #include "headers/all.h"
 #include "discord_game_sdk.h"
+#include <time.h>
+#include <string.h>
 
 //- Constants
 #define APPLICATION_ID 778719957956689922ll
@@ -17,45 +19,50 @@ internal u32 simple_parse_uint(const char* restrict str, uint max) {
 	return r;
 }
 
-//- Types
-struct DiscordApplication {
-	struct IDiscordCore* core;
-	struct IDiscordUserManager* users;
-	struct IDiscordAchievementManager* achievements;
-	struct IDiscordActivityManager* activities;
-	struct IDiscordRelationshipManager* relationships;
-	struct IDiscordApplicationManager* application;
-	struct IDiscordLobbyManager* lobbies;
-	DiscordUserId user_id;
-};
+internal u64 get_unix_timestamp(void) {
+	time_t result = time(NULL);
+	if (result == -1)
+		return 0;
+	
+	return (u64)result;
+}
 
+//- Types
 enum EDiscordResult typedef DiscordResult;
 
 //- Globals
-internal struct DiscordApplication discord;
+internal struct IDiscordCore* core;
+internal struct IDiscordUserManager* users;
+internal struct IDiscordAchievementManager* achievements;
+internal struct IDiscordActivityManager* activities;
+internal struct IDiscordRelationshipManager* relationships;
+internal struct IDiscordApplicationManager* application;
+internal struct IDiscordLobbyManager* lobbies;
+
 internal struct IDiscordUserEvents users_events;
 internal struct IDiscordActivityEvents activities_events;
 internal struct IDiscordRelationshipEvents relationships_events;
 internal DiscordBranch branch;
-struct DiscordClientUser discord_user;
+
+struct DiscordClientUser discord;
 
 //- Callbacks
 internal void discord_callback_on_user_updated(void* data) {
 	static struct DiscordUser user;
 	DiscordResult result;
 	
-	result = discord.users->get_current_user(discord.users, &user);
+	result = users->get_current_user(users, &user);
 	if (result != DiscordResult_Ok) {
 		debug_error("Failed to get current user: %i\n", result);
 		return;
 	}
 	
-	discord_user.connected = true;
-	discord_user.id = user.id;
-	discord_user.username = (string) { .ptr = user.username, .len = strlen(user.username) };
-	discord_user.discriminator = simple_parse_uint(user.discriminator, 8);
+	discord.connected = true;
+	discord.id = user.id;
+	discord.username = (string) { .ptr = user.username, .len = strnlen(user.username, sizeof user.username) };
+	discord.discriminator = simple_parse_uint(user.discriminator, 8);
 	
-	debug_log("User ID: %llu\nUsername: %.*s\nDiscriminator: %u\n", discord_user.id, discord_user.username.len, discord_user.username.ptr, discord_user.discriminator);
+	debug_log("User ID: %llu\nUsername: %.*s\nDiscriminator: %u\n", discord.id, discord.username.len, discord.username.ptr, discord.discriminator);
 }
 
 internal void discord_callback_on_relationship_refresh(void* data) {
@@ -81,34 +88,35 @@ b32 discord_init(void) {
 	
 	// DiscordCreate
     DiscordCreateParamsSetDefault(&params);
-    params.client_id = APPLICATION_ID;
+    
+	params.client_id = APPLICATION_ID;
     params.flags = DiscordCreateFlags_NoRequireDiscord;
     params.event_data = &discord;
     params.activity_events = &activities_events;
     params.relationship_events = &relationships_events;
     params.user_events = &users_events;
     
-	result = DiscordCreate(DISCORD_VERSION, &params, &discord.core);
-	if (result != DiscordResult_Ok || !discord.core)
+	result = DiscordCreate(DISCORD_VERSION, &params, &core);
+	if (result != DiscordResult_Ok || !core)
 		return false;
 	
 	// get managers
-	discord.users = discord.core->get_user_manager(discord.core);
-	discord.achievements = discord.core->get_achievement_manager(discord.core);
-	discord.activities = discord.core->get_activity_manager(discord.core);
-	discord.application = discord.core->get_application_manager(discord.core);
-	discord.lobbies = discord.core->get_lobby_manager(discord.core);
-	discord.relationships = discord.core->get_relationship_manager(discord.core);
+	users         = core->get_user_manager(core);
+	achievements  = core->get_achievement_manager(core);
+	activities    = core->get_activity_manager(core);
+	application   = core->get_application_manager(core);
+	lobbies       = core->get_lobby_manager(core);
+	relationships = core->get_relationship_manager(core);
 	
 #if 0
 	// NOTE(luigi): disabled. asking for oauth2 token can be an inconvenience for the end user.
 	//              I don't know if we are going to need this, but it'll be disabled for now.
-	discord.application->get_oauth2_token(discord.application, NULL, discord_callback_on_oauth2_token);
-#endif
+	application->get_oauth2_token(application, NULL, discord_callback_on_oauth2_token);
 	
 	// get branch (idk what this is)
-	discord.application->get_current_branch(discord.application, &branch);
+	application->get_current_branch(application, &branch);
 	debug_log("Current branch %s\n", branch);
+#endif
 	
 	discord_update_activity();
 	
@@ -116,15 +124,15 @@ b32 discord_init(void) {
 }
 
 void discord_deinit(void) {
-	if (discord.core) {
-		discord.core->destroy(discord.core);
-		discord.core = NULL;
+	if (core) {
+		core->destroy(core);
+		core = NULL;
 	}
 }
 
 void discord_update(void) {
-	if (discord.core)
-		discord.core->run_callbacks(discord.core);
+	if (core)
+		core->run_callbacks(core);
 }
 
 void discord_update_activity(void) {
@@ -142,6 +150,6 @@ void discord_update_activity(void) {
 		}
 	};
 	
-	discord.activities->update_activity(discord.activities, &activity, NULL, discord_callback_on_activity_update);
+	activities->update_activity(activities, &activity, NULL, discord_callback_on_activity_update);
 }
 

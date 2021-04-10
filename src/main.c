@@ -1,5 +1,4 @@
 // Includes
-#define NDEBUG
 #include "headers/all.h"
 
 struct GameGlobalState game = { 0 };
@@ -89,9 +88,6 @@ do { if (!argv[i+1]) { debug_error("Missing value for argument '%s'. Default to 
 int main(int argc, char* argv[]) {
 	struct GameArgs args;
 	uint result;
-	
-	// Main things setup
-	setvbuf(stdout, NULL, _IONBF, 0);
 	
 	// Initialize game.
 	parse_args(&args, (uint)argc, (void*)argv);

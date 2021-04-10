@@ -52,7 +52,7 @@ f64 random_f64(void) {
 // 32 bits version of random()
 u32 random_u32(void) {
 	u64 result = random_u64();
-	return ((u32*)&result)[1]; // the higher bits are more random.
+	return (u32)(result >> 32); // the higher bits are more random.
 }
 
 // Test the randomness of random_f64()

@@ -39,9 +39,6 @@ void locale_init(void) {
 			continue;
 		
 		// Make english as default.
-		if (strcmp(entry->d_name, "en-us") == 0)
-			currentLocale = localesFiles.len;
-		
 		char fullpath[512];
 		snprintf(fullpath, sizeof fullpath, "./locale/%s", entry->d_name);
 		
