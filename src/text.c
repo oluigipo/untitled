@@ -173,7 +173,7 @@ uint text_render_to_texture(Texture* restrict output, string text, const Texture
 }
 
 uint text_render(string text, const mat4 where, const Texture* restrict font) {
-	return text_render_ext(text, where, font, NULL, TEXTRENDER_NONE);
+	return text_render_ext(text, where, font, NULL, ALIGNMENT_NONE);
 }
 
 uint text_render_ext(string text, const mat4 where, const Texture* restrict font, const uint* restrict colorData, u32 flags) {
@@ -250,16 +250,16 @@ uint text_render_ext(string text, const mat4 where, const Texture* restrict font
 	glm_scale(end, (vec3) { width, height });
 	
 	vec3 offset = { 0 };
-	switch (flags & TEXTRENDER_XALIGN) {
-		case TEXTRENDER_LEFT: offset[0] = 0.0f; break;
-		case TEXTRENDER_RIGHT: offset[0] = -1.0f; break;
-		case TEXTRENDER_CENTER: offset[0] = -0.5f; break;
+	switch (flags & ALIGNMENT_XAXIS) {
+		case ALIGNMENT_LEFT: offset[0] = 0.0f; break;
+		case ALIGNMENT_RIGHT: offset[0] = -1.0f; break;
+		case ALIGNMENT_CENTER: offset[0] = -0.5f; break;
 	}
 	
-	switch (flags & TEXTRENDER_YALIGN) {
-		case TEXTRENDER_TOP: offset[1] = 0.0f; break;
-		case TEXTRENDER_BOTTOM: offset[1] = -1.0f; break;
-		case TEXTRENDER_MIDDLE: offset[1] = -0.5f; break;
+	switch (flags & ALIGNMENT_YAXIS) {
+		case ALIGNMENT_TOP: offset[1] = 0.0f; break;
+		case ALIGNMENT_BOTTOM: offset[1] = -1.0f; break;
+		case ALIGNMENT_MIDDLE: offset[1] = -0.5f; break;
 	}
 	
 	glm_translate(end, offset);

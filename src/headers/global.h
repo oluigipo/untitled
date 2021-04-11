@@ -6,6 +6,7 @@
 #include "framebuffer.h"
 
 #define FPS_DEFAULT 60
+#define SCREEN_SCALE 1
 
 typedef uint (*__scene_t)(void);
 typedef __scene_t Scene;

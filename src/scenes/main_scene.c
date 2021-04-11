@@ -11,55 +11,26 @@
 */
 
 uint scene_main(void) {
-	Shader shader = shader_load("res/shader");
-	
-	Uniform uniformTex = shader_uniform(shader, "uTexture");
-	Uniform uniformView = shader_uniform(shader, "uView");
-	Uniform uniformObj = shader_uniform(shader, "uObject");
-	
 	mat4 object;
-	
-	uint vbo, vao;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	
-	f32 vertices[] = {
-		// positions           color                texcoords
-		0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,    0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,    1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,    1.0f, 1.0f,
-		1.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,    1.0f, 1.0f,
-		0.0f, 0.0f, 0.0f,      1.0f, 1.0f, 1.0f,    0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f,      1.0f, 1.0f, 1.0f,    0.0f, 0.0f,
-	};
-	
-	glBufferData(GL_ARRAY_BUFFER, sizeof vertices, vertices, GL_STATIC_DRAW);
-	
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(f32) * 8, 0);
-	
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(f32) * 8, (void*)(sizeof(f32) * 3));
-	
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeof(f32) * 8, (void*)(sizeof(f32) * 6));
 	
 	// Walle things
 	vec2 position = { 0 };
 	vec2 velocity = { 0 };
+	Sprite walleSprite = sprite_craft(&(struct SpriteBase) {
+										  .texture = &assets_textures[TEX_SPRITES_0],
+										  .offset = { 0, 16 },
+										  .size = { 128, 144 }
+									  });
 	
 	// Particles
 	ParticleManager mgr = { 0 };
 	
 	// Camera
 	struct Camera camera = {
-		.pos = { 0, 0 },
+		.pos = { position[0], position[1] },
 		.angle = 0,
-		.zoom = 2,
-		.speed = 3.0f
+		.zoom = 2.0f / SCREEN_SCALE,
+		.speed = 0.3f
 	};
 	
 	// Music
@@ -67,9 +38,10 @@ uint scene_main(void) {
 	uint source = sound_make_source();
 	
 	sound_source_buffer(source, buffer);
-	sound_play_source(source);
 	sound_source_attenuation(source, 1.0f, 300.0f, 10000.0f);
 	sound_source_params(source, 0.2f, 1.0f);
+	sound_source_position(source, (vec3) { 0, 0, -300.0f });
+	sound_play_source(source);
 	
 	b32 playingSound = true;
 	
@@ -91,11 +63,38 @@ uint scene_main(void) {
 		.data = tilemapData
 	};
 	
+	// Batch Renderer
+	SpriteBatch sprbatch;
+	
+	// Ghosts
+	struct { vec3 position; u32 blend; } ghosts[100];
+	const usize ghostCount = sizeof(ghosts) / sizeof(ghosts[0]);
+	
+	struct SpriteBase ghostSpriteBase = {
+		.texture = &assets_textures[TEX_SPRITES_0],
+		.offset = { 0, 0 },
+		.size = { 16, 16 }
+	};
+	
+	Sprite ghostSprite = sprite_craft(&ghostSpriteBase);
+	
+	for (uint i = 0; i < ghostCount; ++i) {
+		ghosts[i].position[0] = (random_f64() * 2 - 1) * 500.0f;
+		ghosts[i].position[1] = (random_f64() * 2 - 1) * 500.0f;
+		ghosts[i].position[2] = 0;
+		
+		switch (random_u32() % 3) {
+			case 0: ghosts[i].blend = 0xFF8888FF; break;
+			case 1: ghosts[i].blend = 0xFF88FF88; break;
+			case 2: ghosts[i].blend = 0xFFFF8888; break;
+		}
+	}
+	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
 		engine_begin_frame();
 		
-		// Update
+		//- Update
 		if (gamepad_is_pressed(GPAD_BUTTON_Y)) {
 			playingSound = !playingSound;
 			
@@ -113,6 +112,8 @@ uint scene_main(void) {
 		position[0] += velocity[0] * game.deltaTime;
 		position[1] += velocity[1] * game.deltaTime;
 		
+		sound_listener_position((vec3) { position[0], position[1] });
+		
 		if (gamepad_is_down(GPAD_BUTTON_A)) {
 			f32 scale = random_f64() * 0.5f + 0.5f;
 			
@@ -126,42 +127,44 @@ uint scene_main(void) {
 						});
 		}
 		
-		sound_source_position(source, (vec3) { position[0], position[1], -300.0f });
-		
 		partmgr_update(&mgr);
 		
-		mat4 view;
+		glm_vec2_copy(position, camera.targetPos);
 		camera_update(&camera);
-		camera_matrix(&camera, view);
 		
-		// Draw
+		//- Draw
 		glClearColor(0.0f, 0.6f, 0.8f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
+		mat4 view;
+		camera_matrix(&camera, view);
+		sprite_batch_init(&sprbatch, 1, &assets_textures[TEX_SPRITES_0]);
+		
 		// Draw Tilemap
 		glm_mat4_identity(object);
-		glm_scale(object, (vec3) { 16, 16 });
+		glm_translate(object, (vec3) { -200.0f, -200.0f });
 		glm_mat4_mul(view, object, object);
 		tilemap_render(&tilemap, object);
 		
+		// Sprite
+		for (uint i = 0; i < ghostCount; ++i) {
+			glm_mat4_identity(object);
+			glm_translate(object, ghosts[i].position);
+			glm_scale(object, (vec3) { 2, 2 });
+			glm_mul(view, object, object);
+			
+			sprite_batch_add(&sprbatch, &ghostSprite, object, ghosts[i].blend, 0, ALIGNMENT_NONE);
+		}
+		
 		// Draw walle
-		glBindVertexArray(vao);
-		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, assets_textures[TEX_WALLE].id);
-		
-		shader_bind(shader);
-		
 		glm_mat4_identity(object);
 		glm_translate(object, (vec3) { position[0], position[1] });
-		glm_scale(object, (vec3) { assets_textures[TEX_WALLE].size[0], assets_textures[TEX_WALLE].size[1] });
-		glm_translate(object, (vec3) { -0.5f, -0.5f });
+		glm_mat4_mul(view, object, object);
 		
-		glUniform1i(uniformTex, 0);
-		glUniformMatrix4fv(uniformView, 1, false, (f32*)view);
-		glUniformMatrix4fv(uniformObj, 1, false, (f32*)object);
+		sprite_batch_add(&sprbatch, &walleSprite, object, 0xFFFFFFFF, 0, ALIGNMENT_CENTER | ALIGNMENT_MIDDLE);
 		
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		// Finish Sprite Batching
+		sprite_batch_flush(&sprbatch);
 		
 		// Draw text
 		glm_mat4_identity(object);
@@ -172,23 +175,19 @@ uint scene_main(void) {
 		string str = { .ptr = myText };
 		str.len = snprintf(myText, sizeof myText,
 						   "%.*s \x01\n",
-						   locale_str(TXT_HELLO_WORLD).len, locale_str(TXT_HELLO_WORLD).ptr);
+						   strfmt(locale_str(TXT_HELLO_WORLD)));
 		
 		str.len += snprintf(myText + str.len, sizeof(myText) - str.len,
 							(discord.connected) ? "Discord: %.*s#%u" : "Connecting to Discord...",
 							discord.username.len, discord.username.ptr, discord.discriminator);
 		
-		text_render_ext(str, object, &assets_textures[TEX_DEFAULT_FONT], NULL, TEXTRENDER_CENTER | TEXTRENDER_MIDDLE);
+		text_render_ext(str, object, &assets_textures[TEX_DEFAULT_FONT], NULL, ALIGNMENT_CENTER | ALIGNMENT_MIDDLE);
 		
-		shader_unbind();
 		partmgr_render(&mgr, view);
 		
+		sprite_batch_done(&sprbatch);
 		engine_end_frame();
 	}
-	
-	glDeleteBuffers(1, &vbo);
-	glDeleteVertexArrays(1, &vao);
-	shader_unload(shader);
 	
 	sound_delete_source(source);
 	sound_unload(buffer);

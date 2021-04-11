@@ -15,7 +15,7 @@ internal void glfwcallback_window_resize(GLFWwindow* window, int width, int heig
 	game.window.width = (uint)width;
 	game.window.height = (uint)height;
 	
-	framebuffer_resize(&game.framebuffer, (vec2u) { (uint)width, (uint)height });
+	framebuffer_resize(&game.framebuffer, (vec2u) { (uint)width / SCREEN_SCALE, (uint)height / SCREEN_SCALE });
 	if (game.framebufferStackSize == 1) {
 		glViewport(0, 0, game.framebuffer.tex.size[0], game.framebuffer.tex.size[1]);
 	}
@@ -98,6 +98,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	sound_init();
 	text_rendering_setup();
 	discord_init();
+	sprite_rendering_init();
 	
 	if (args->locale != -1) currentLocale = args->locale;
 	
@@ -108,7 +109,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	// glEnable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	framebuffer_init(&game.framebuffer, (vec2u) { game.window.width, game.window.height });
+	framebuffer_init(&game.framebuffer, (vec2u) { game.window.width / SCREEN_SCALE, game.window.height / SCREEN_SCALE });
 	framebuffer_bind(&game.framebuffer);
 	
 	game_update_projection_matrix();

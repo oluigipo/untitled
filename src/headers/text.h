@@ -9,19 +9,6 @@ struct TextVertexInfo {
 	f32 chr;
 };
 
-enum {
-	TEXTRENDER_NONE = 0,
-	TEXTRENDER_LEFT = 1,
-	TEXTRENDER_RIGHT = 2,
-	TEXTRENDER_CENTER = 3,
-	TEXTRENDER_XALIGN = 3,
-	
-	TEXTRENDER_TOP = 4,
-	TEXTRENDER_BOTTOM = 8,
-	TEXTRENDER_MIDDLE = 12,
-	TEXTRENDER_YALIGN = 12,
-};
-
 void text_rendering_setup(void);
 uint text_render_to_texture(Texture* restrict output, string text, const Texture* restrict font, const uint* restrict colorData);
 uint text_render(string text, const mat4 where, const Texture* restrict font);

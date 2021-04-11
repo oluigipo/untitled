@@ -17,6 +17,7 @@
 #include "options.c"
 #include "framebuffer.c"
 #include "tilemap.c"
+#include "sprite.c"
 #include "shapes.c"
 #include "scenes/main_scene.c"
 

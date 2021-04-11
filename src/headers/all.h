@@ -21,3 +21,4 @@
 #include "headers/framebuffer.h"
 #include "headers/discord.h"
 #include "headers/tilemap.h"
+#include "headers/sprite.h"

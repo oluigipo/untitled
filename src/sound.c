@@ -23,10 +23,10 @@ void sound_init(void) {
 	
 	alcMakeContextCurrent(soundContext);
 	
-	debug({
-			  const ALchar* name = alcGetString(soundDevice, ALC_DEVICE_SPECIFIER);
-			  debug_log("OpenAL's Device Name: %s\n", name);
-		  });
+	debug {
+		const ALchar* name = alcGetString(soundDevice, ALC_DEVICE_SPECIFIER);
+		debug_log("OpenAL's Device Name: %s\n", name);
+	};
 	
 	sound_listener_position((vec3) { 0 });
 	alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f);

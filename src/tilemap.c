@@ -39,7 +39,7 @@ void tilemap_render(const struct Tilemap* tilemap, const mat4 where) {
 	// Position
 	mat4 end;
 	glm_mat4_identity(end);
-	glm_mat4_scale(end, (vec3) { tilemap->texture->size[0], tilemap->texture->size[1] });
+	glm_scale(end, (vec3) { tilemap->texture->size[0], tilemap->texture->size[1] });
 	glm_mat4_mul(where, end, end);
 	
 	// Draw

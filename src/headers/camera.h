@@ -3,7 +3,7 @@
 
 struct Camera {
 	vec2 pos;
-	vec2 vel;
+	vec2 targetPos;
 	f32 angle;
 	f32 zoom;
 	f32 speed;

@@ -135,7 +135,7 @@ void stack_deinit(Stack* stack) {
 void* stack_push(Stack* stack, usize size) {
 	size = (size + 7) & ~7;
 	
-	struct StackHeader* previous = stack->header->previous;
+	struct StackHeader* previous = stack->header;
 	stack->header = (void*)((char*)(previous+1) + stack->header->size);
 	stack->header->previous = previous;
 	

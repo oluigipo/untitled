@@ -25,6 +25,12 @@
 #define megabytes(x) (kilobytes(x) * 1024ull)
 #define kilobytes(x) ((u64)(x) * 1024ull)
 
+#ifndef offsetof
+#  define offsetof(T,f) ((char*)(&((T*)0)->f))
+#endif
+
+#define strfmt(s) (s).len, (s).ptr
+
 /// Structs
 // A range of characters in memory. Not necessarily null-terminated.
 typedef struct string {
