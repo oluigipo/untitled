@@ -16,11 +16,11 @@ uint scene_main(void) {
 	// Walle things
 	vec2 position = { 0 };
 	vec2 velocity = { 0 };
-	Sprite walleSprite = sprite_craft(&(struct SpriteBase) {
-										  .texture = &assets_textures[TEX_SPRITES_0],
-										  .offset = { 0, 16 },
-										  .size = { 128, 128 }
-									  });
+	Sprite walleSprite = {
+		.texture = &assets_textures[TEX_SPRITES_0],
+		.offset = { 0, 16 },
+		.size = { 128, 128 }
+	};
 	
 	// Particles
 	ParticleManager mgr = { 0 };
@@ -70,13 +70,11 @@ uint scene_main(void) {
 	struct { vec3 position; u32 blend; } ghosts[100];
 	const usize ghostCount = sizeof(ghosts) / sizeof(ghosts[0]);
 	
-	struct SpriteBase ghostSpriteBase = {
+	Sprite ghostSprite = {
 		.texture = &assets_textures[TEX_SPRITES_0],
 		.offset = { 0, 0 },
 		.size = { 16, 16 }
 	};
-	
-	Sprite ghostSprite = sprite_craft(&ghostSpriteBase);
 	
 	for (uint i = 0; i < ghostCount; ++i) {
 		ghosts[i].position[0] = (random_f64() * 2 - 1) * 500.0f;
@@ -167,10 +165,6 @@ uint scene_main(void) {
 		sprite_batch_flush(&sprbatch);
 		
 		// Draw text
-		glm_mat4_identity(object);
-		glm_scale(object, (vec3) { 2, 2 });
-		glm_mul(view, object, object);
-		
 		unsigned char myText[512];
 		string str = { .ptr = myText };
 		str.len = snprintf(myText, sizeof myText,
@@ -181,6 +175,21 @@ uint scene_main(void) {
 							(discord.connected) ? "Discord: %.*s#%u" : "Connecting to Discord...",
 							discord.username.len, discord.username.ptr, discord.discriminator);
 		
+		vec2u textusize;
+		text_size(str, textusize, &assets_textures[TEX_DEFAULT_FONT]);
+		vec2 textsize = { textusize[0], textusize[1] };
+		glm_vec2_scale(textsize, 2.25f, textsize);
+		
+		glm_mat4_identity(object);
+		glm_scale(object, textsize);
+		glm_translate(object, (vec3) { -0.5f, -0.5f });
+		glm_mat4_mul(view, object, object);
+		primitive_render_roundrect(object, 0xFF202020, 1.0f, (vec2) { 1, textsize[1] / textsize[0] });
+		
+		
+		glm_mat4_identity(object);
+		glm_scale(object, (vec3) { 2, 2 });
+		glm_mul(view, object, object);
 		text_render_ext(str, object, &assets_textures[TEX_DEFAULT_FONT], NULL, ALIGNMENT_CENTER | ALIGNMENT_MIDDLE);
 		
 		partmgr_render(&mgr, view);

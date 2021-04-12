@@ -22,3 +22,10 @@ enum {
 	ALIGNMENT_YAXIS = 12,
 };
 
+internal void argb_to_color(u32 blending, vec4 output) {
+	output[0] = (f32)((blending >> 16) & 0xFF) / 255.0f; // R
+	output[1] = (f32)((blending >> 8 ) & 0xFF) / 255.0f; // G
+	output[2] = (f32)((blending >> 0 ) & 0xFF) / 255.0f; // B
+	output[3] = (f32)((blending >> 24) & 0xFF) / 255.0f; // A
+}
+

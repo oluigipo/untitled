@@ -19,6 +19,7 @@
 #include "tilemap.c"
 #include "sprite.c"
 #include "shapes.c"
+#include "primitives.c"
 #include "scenes/main_scene.c"
 
 #include "std.c"

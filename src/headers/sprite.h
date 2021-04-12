@@ -4,19 +4,19 @@
 
 void sprite_rendering_init(void);
 
-struct SpriteBase {
+struct Sprite {
 	Texture* texture;
 	vec2u offset;
 	vec2u size;
-};
+} typedef Sprite;
 
-struct Sprite {
+struct SpriteRenderable {
 	Texture* texture;
 	vec2 texcoords;
 	vec2 size;
-} typedef Sprite;
+} typedef SpriteRenderable;
 
-Sprite sprite_craft(const struct SpriteBase* base);
+SpriteRenderable sprite_craft(const Sprite* base);
 void sprite_render(const Sprite* spr, const mat4 where);
 void sprite_render_ext(const Sprite* spr, const mat4 where, u32 blending, u32 frame, u32 flags);
 
