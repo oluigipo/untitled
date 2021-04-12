@@ -34,10 +34,10 @@ void sprite_render_ext(const Sprite* spr, const mat4 where, u32 blending, u32 fr
 }
 
 //~ Sprite Batching
-void sprite_batch_init(SpriteBatch* batch, usize cap, Texture* tex) {
+void sprite_batch_init(SpriteBatch* batch, usize cap) {
 	batch->cap = cap;
 	batch->len = 0;
-	batch->texture = tex;
+	batch->texture = NULL;
 	batch->elements = stack_alloc(&game.frameStack, sizeof(batch->elements[0]) * cap);
 }
 
@@ -53,13 +53,17 @@ void sprite_batch_reserve_more(SpriteBatch* batch, usize count) {
 }
 
 void sprite_batch_add(SpriteBatch* batch, const Sprite* spr, const mat4 where, u32 blending, u32 frame, u32 flags) {
-	assert(batch->texture->id == spr->texture->id);
-	
 	// Reserve
 	if (batch->len + 1 > batch->cap) sprite_batch_reserve_more(batch, 1);
 	
 	// Get element
 	struct SpriteBatchElement* element = &batch->elements[batch->len++];
+	
+	if (!batch->texture) {
+		batch->texture = spr->texture;
+	} else {
+		assert(batch->texture->id == spr->texture->id);
+	}
 	
 	// Set values
 	element->blending[0] = (f32)((blending >> 16) & 0xFF) / 255.0f; // R
@@ -96,6 +100,7 @@ void sprite_batch_flush(SpriteBatch* batch) {
 	if (batch->len > 0)
 		sprite_batch_render(batch);
 	
+	batch->texture = NULL;
 	batch->len = 0;
 }
 
@@ -140,6 +145,7 @@ void sprite_batch_render(const SpriteBatch* batch) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, batch->texture->id);
 	glUniform1i(spriteRendering.uTexture, 0);
+	
 	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, batch->len);
 	
 	shader_unbind();
@@ -155,5 +161,6 @@ void sprite_batch_done(SpriteBatch* batch) {
 	stack_free(&game.frameStack, batch->elements);
 	batch->elements = NULL;
 	batch->len = batch->cap = 0;
+	batch->texture = NULL;
 }
 

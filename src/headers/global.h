@@ -36,6 +36,7 @@ struct GameGlobalState {
 	Framebuffer framebuffer;
 	uint fbShader;
 	uint fbShaderTex;
+	uint fbTime;
 	uint fbVAO;
 	uint fbVBO;
 	mat4 projection;

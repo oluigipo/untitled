@@ -116,6 +116,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	
 	game.fbShader = shader_load("res/window");
 	game.fbShaderTex = shader_uniform(game.fbShader, "uTexture");
+	game.fbTime = shader_uniform(game.fbShader, "uTime");
 	
 	f32 vertices[] = {
 		0.0f, 0.0f,
@@ -174,6 +175,7 @@ void engine_end_frame(void) {
 	
 	shader_bind(game.fbShader);
 	glUniform1i(game.fbShaderTex, 0);
+	glUniform1f(game.fbTime, glfwGetTime());
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, game.framebuffer.tex.id);
 	

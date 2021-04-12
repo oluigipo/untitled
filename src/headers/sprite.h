@@ -34,7 +34,7 @@ struct SpriteBatch {
 	Texture* texture;
 } typedef SpriteBatch;
 
-void sprite_batch_init(SpriteBatch* batch, usize cap, Texture* tex);
+void sprite_batch_init(SpriteBatch* batch, usize cap);
 void sprite_batch_reserve_more(SpriteBatch* batch, usize count);
 void sprite_batch_add(SpriteBatch* batch, const Sprite* spr, const mat4 where, u32 blending, u32 frame, u32 flags);
 void sprite_batch_flush(SpriteBatch* batch);

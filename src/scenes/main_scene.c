@@ -19,7 +19,7 @@ uint scene_main(void) {
 	Sprite walleSprite = sprite_craft(&(struct SpriteBase) {
 										  .texture = &assets_textures[TEX_SPRITES_0],
 										  .offset = { 0, 16 },
-										  .size = { 128, 144 }
+										  .size = { 128, 128 }
 									  });
 	
 	// Particles
@@ -138,7 +138,7 @@ uint scene_main(void) {
 		
 		mat4 view;
 		camera_matrix(&camera, view);
-		sprite_batch_init(&sprbatch, 1, &assets_textures[TEX_SPRITES_0]);
+		sprite_batch_init(&sprbatch, 1);
 		
 		// Draw Tilemap
 		glm_mat4_identity(object);
