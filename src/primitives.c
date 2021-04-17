@@ -33,6 +33,7 @@ void primitive_rendering_init(void) {
 	primitiveRendering.rectangleVAO = rectVAO;
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void primitive_render_rect(const mat4 where, u32 color) {

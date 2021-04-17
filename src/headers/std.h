@@ -38,6 +38,20 @@ typedef struct string {
 	const unsigned char* ptr;
 } string;
 
+typedef struct stringUTF8 {
+	usize size;
+	const unsigned char* ptr;
+} stringUTF8;
+
+// Returns str's length. 0 will be returned if some error occured
+usize string_utf8_len(stringUTF8 str);
+// Returns the char at position 'index' in 'str'. 0 will be returned if some error occured
+u32 string_utf8_char_at(stringUTF8 str, usize index);
+// Returns the next char of iterator 'str'. 0 will be returned and 'str' won't be modified if some error occured
+u32 string_utf8_next_char(stringUTF8* str);
+// Encode 'ch' in 'str'. Returns the number of bytes written to 'str'. 0 will be returned if the size of bytes won't fit in 'str' (of size 'max') or any other error occurs.
+usize string_utf8_write_char(u8* str, usize max, u32 ch);
+
 // A dynamic null-terminated buffer of characters.
 typedef struct strbuf {
 	usize cap, len;

@@ -1,5 +1,110 @@
 #include "headers/std.h"
 
+usize string_utf8_len(stringUTF8 str) {
+	usize len = 0;
+	uint ext = 0;
+	const u8* end = str.ptr + str.size;
+	const u8* ptr = str.ptr;
+	
+	__beginning:;
+	while (ptr < end) {
+		if (ext > 0) {
+			if ((*ptr & 0b11100000) != 0b01100000) {
+				// something is wrong
+				goto __error;
+			}
+			
+			++ptr;
+			if (--ext == 0) ++len;
+		} else {
+			u8 ch = *ptr;
+			
+			if (ch & 0b10000000) {
+				do {
+					ch <<= 1;
+				} while (ch & 0b10000000 && ++ext);
+				
+				if (ext == 0) {
+					goto __error;
+				}
+				
+				++ptr;
+				
+				goto __beginning; // break two loops
+			}
+			
+			++ptr;
+			++len;
+		}
+	}
+	
+	if (ptr > end) { // WE HAVE READ TRASH FROM MEMORY!!!
+		
+		__error: // just a invalid string.
+		
+		debug_error("Invalid UTF-8 string:\n\tptr = %p\n\tsize = %llu\n", str.ptr, str.size);
+		return 0;
+	}
+	
+	return len;
+}
+
+u32 string_utf8_char_at(stringUTF8 str, usize index) {
+	u32 result = 0;
+	
+	while (index > 0) {
+		--index;
+		result = string_utf8_next_char(&str);
+	}
+	
+	return result;
+}
+
+u32 string_utf8_next_char(stringUTF8* str) {
+	if (str->size == 0) return 0;
+	
+	u32 result = 0;
+	const u8* ptr = str->ptr;
+	u8 ch = *ptr;
+	uint ext = 0;
+	
+	if (ch & 0b10000000) {
+		do {
+			ch <<= 1;
+		} while (ch & 0b10000000 && ++ext);
+		
+		if (ext == 0) return 0;
+		
+		result |= ch >> ext+2;
+		ch = *++ptr;
+		
+		while (ext --> 0) {
+			if ((ch & 0b11000000) != 0b10000000) return 0;
+			
+			result <<= 6;
+			result |= ch & 0b00111111;
+			ch = *++ptr;
+		}
+		
+		str->size -= (ptr - str->ptr);
+		str->ptr = ptr;
+		
+		return result;
+	}
+	
+	result |= ch;
+	if ((result & 0b10000000) != 0) return 0;
+	
+	--str->size;
+	str->ptr = ptr + 1;
+	
+	return result;
+}
+
+usize string_utf8_write_char(u8* str, usize max, u32 ch) {
+	// TODO
+}
+
 u64 hash_of_cstr(const char* str) {
 	u64 hash = 2166136261ull;
 	

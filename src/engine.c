@@ -31,8 +31,6 @@ uint engine_init(const struct GameArgs* restrict args) {
 	// Load options
 	options_load();
 	
-	//debug_log("currentLocale = %u\n", currentLocale);
-	
 	if (args->width) game.window.width = args->width;
 	if (args->height) game.window.height = args->height;
 	if (args->novsync) game.vsyncEnabled = false;
@@ -45,9 +43,9 @@ uint engine_init(const struct GameArgs* restrict args) {
 	//glfwSetWin32LibraryName("mesa_opengl32.dll");
 #endif
 	
-	// Load GLFW
+	//- Load GLFW
 	if (unlikely(!glfwInit())) {
-		os_message_box("Fatal Error", "Failed to initialize GLFW!\nYour graphics card may support at least OpenGL 3.3 to run the game. Make sure all your drivers are up-to-date!");
+		os_message_box("Fatal Error", "Failed to initialize GLFW!\nMake sure all your drivers are up-to-date! And that you have a monitor pluged in (?)");
 		return 1;
 	}
 	
@@ -73,6 +71,16 @@ uint engine_init(const struct GameArgs* restrict args) {
 	glfwSetWindowPos(window, mode->width / 2 - game.window.width / 2, mode->height / 2 - game.window.height / 2);
 	game.refreshRate = mode->refreshRate;
 	
+	{
+		GLFWimage icon;
+		int _ch;
+		
+		icon.pixels = stbi_load("assets/icon.png", &icon.width, &icon.height, &_ch, 4);
+		glfwSetWindowIcon(window, 1, &icon);
+		
+		stbi_image_free(icon.pixels);
+	}
+	
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		os_message_box("Fatal Error", "Could not load OpenGL functions.\nThis is strange... Is everything okay with your GPU drivers? Try updating them.");
 		glfwDestroyWindow(window);
@@ -86,7 +94,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	game.lastFrame = glfwGetTime();
 	game.shaderStackSize = 1;
 	
-	// Init some other things
+	//- Init some other things
 	glfwSwapInterval(game.vsyncEnabled);
 	stack_init(&game.frameStack, args->mem);
 	input_init();
@@ -105,7 +113,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	
 	//debug(random_test());
 	
-	// Initialize OpenGL things
+	//- Initialize OpenGL things
 	glEnable(GL_BLEND);
 	// glEnable(GL_CULL_FACE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -147,6 +155,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 void engine_begin_frame(void) {
 	game.frameBegin = glfwGetTime();
 	game.deltaTime = (game.frameBegin - game.lastFrame) * FPS_DEFAULT;
+	game.deltaTime = glm_min(game.deltaTime, 5.0f);
 	discord_update();
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, game.framebuffer.id);

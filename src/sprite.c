@@ -144,7 +144,7 @@ void sprite_batch_add(SpriteBatch* batch, const Sprite* spr_, const mat4 where, 
 	}
 	
 	// Reserve
-	if (batch->len + 1 > batch->cap) sprite_batch_reserve_more(batch, 1);
+	if (batch->len + 1 > batch->cap) sprite_batch_reserve_more(batch, 5);
 	
 	struct SpriteBatchElement* element = &batch->elements[batch->len++];
 	SpriteRenderable spr = sprite_craft(spr_);
