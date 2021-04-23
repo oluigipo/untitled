@@ -10,8 +10,27 @@
 
 */
 
+internal b32 walleShouldUpdate = false;
+internal vec2 walleNewPosition;
+
+internal void network_on_buffer(void* _, i64 lobbyId, i64 userId, u8 channel, Buffer* buff) {
+	u16 kind = buffer_read_u16(buff);
+	
+	switch (kind) {
+		case 1: {
+			
+			walleShouldUpdate = true;
+			
+			walleNewPosition[0] = buffer_read_f32(buff);
+			walleNewPosition[1] = buffer_read_f32(buff);
+			
+		} break;
+	}
+}
+
 uint scene_main(void) {
 	mat4 object;
+	discord.on_buffer = network_on_buffer;
 	
 	// Walle things
 	vec2 position = { 0 };
@@ -90,7 +109,25 @@ uint scene_main(void) {
 		engine_begin_frame();
 		
 		//- Update
-		if (gamepad_is_pressed(GPAD_BUTTON_Y)) {
+		if (keyboard_is_pressed(GLFW_KEY_O)) {
+			if (discord_is_connected_to_lobby())
+				discord_exit_lobby();
+			else
+				discord_create_lobby();
+		}
+		
+		if (keyboard_is_pressed(GLFW_KEY_P)) {
+			u8 buffer[128];
+			Buffer buff = buffer_from(buffer, sizeof buffer);
+			
+			buffer_write_u16(&buff, 1);
+			buffer_write_f32(&buff, position[0]);
+			buffer_write_f32(&buff, position[1]);
+			
+			discord_send_buffer(buff, true);
+		}
+		
+		if (keyboard_is_pressed(GLFW_KEY_TAB)) {
 			playingSound = !playingSound;
 			
 			if (playingSound) sound_play_source(source);
@@ -99,6 +136,10 @@ uint scene_main(void) {
 		
 		if (gamepad_is_pressed(GPAD_BUTTON_START))
 			glfwSetWindowShouldClose(game.apiWindow, true);
+		
+		if (walleShouldUpdate) {
+			glm_vec2_copy(walleNewPosition, position);
+		}
 		
 		f32 targetSpeed = 3.0f + 2.0f * gamepad_axis(GPAD_AXIS_R2);
 		velocity[0] = lerpf(velocity[0], gamepad_axis(GPAD_AXIS_LX) * targetSpeed, 0.3f * game.deltaTime);

@@ -40,3 +40,5 @@ b32 discord_create_lobby(void);
 b32 discord_exit_lobby(void);
 b32 discord_send_buffer(Buffer buff, b32 reliable);
 b32 discord_toggle_lobby_lock(void);
+b32 discord_is_connected_to_lobby(void);
+b32 discord_am_the_owner(void);

@@ -6,8 +6,8 @@
 
 //- Constants and Macros
 #define APPLICATION_ID 778719957956689922ll
-#define assert_result(x) if ((x) != DiscordResult_Ok) return false
-#define assert_result_void(x) if ((x) != DiscordResult_Ok) return
+#define assert_result(x) if ((x) != DiscordResult_Ok) { assert(! #x ); return false; }
+#define assert_result_void(x) if ((x) != DiscordResult_Ok) { assert(! #x ); return; }
 
 //- Helper Functions
 internal u32 simple_parse_uint(const char* restrict str, uint max) {
@@ -105,12 +105,15 @@ internal void discord_callback_on_lobby_disconnect(void* data, DiscordResult res
 
 internal void discord_callback_on_lobby_connect(void* data, DiscordResult result, struct DiscordLobby* lobby) {
 	discord.joining = false;
+	debug_log("Lobby Connect: %i\n", result);
+	
 	if (result != DiscordResult_Ok)
 		return;
 	
-	debug_log("Lobby Connect: %i\n", result);
-	
-	if (lobbies->connect_network(lobbies, lobby->id) != DiscordResult_Ok) {
+	if (lobbies->connect_network(lobbies, lobby->id) != DiscordResult_Ok ||
+		lobbies->open_network_channel(lobbies, lobby->id, 0, false) != DiscordResult_Ok ||
+		lobbies->open_network_channel(lobbies, lobby->id, 1, true) != DiscordResult_Ok
+		) {
 		lobbies->disconnect_lobby(lobbies, lobby->id, NULL, discord_callback_on_lobby_disconnect);
 		return;
 	}
@@ -163,11 +166,14 @@ internal void discord_callback_lobby_delete(void* data, DiscordResult result) {
 }
 
 internal void discord_callback_on_network_message(void* _data, i64 lobbyId, i64 userId, u8 channel, u8* data, u32 length) {
+	debug_log("Receiving buffer from: %lli\n", userId);
+	
 	Buffer buff = buffer_from(data, length);
 	
 	if (discord.on_buffer) {
-		while (buff.head < buff.cap)
+		do {
 			discord.on_buffer(data, lobbyId, userId, channel, &buff);
+		} while (buff.head != 0);
 	}
 }
 
@@ -193,20 +199,25 @@ internal void discord_callback_on_member_disconnect(void* data, i64 lobbyId, i64
 }
 
 internal void discord_callback_lobby_disconnect_as_host(void* data, DiscordResult result) {
-	if (result == DiscordResult_Ok) {
-		assert_result_void(lobbies->disconnect_network(lobbies, discord.lobby.id));
-		lobbies->disconnect_lobby(lobbies, discord.lobby.id, data, discord_callback_on_lobby_disconnect);
-	}
+	if (result != DiscordResult_Ok) return;
+	
+	assert_result_void(lobbies->disconnect_network(lobbies, discord.lobby.id));
+	lobbies->disconnect_lobby(lobbies, discord.lobby.id, data, discord_callback_on_lobby_disconnect);
 }
 
-internal void discord_callback_on_activity_join(void* data, const char secret[128]) {
-	if (discord.lobby.id != 0)
+internal void discord_callback_on_activity_join(void* data, const char* secret) {
+	debug_log("On Activity Join: %s\n", secret);
+	
+	if (discord.lobby.id != 0 || discord.joining)
 		return;
 	
+	discord.joining = true;
 	lobbies->connect_lobby_with_activity_secret(lobbies, (char*)secret, NULL, discord_callback_on_lobby_connect);
 }
 
 internal DiscordResult discord_send_buffer_to_user(Buffer buff, b32 reliable, i64 userId) {
+	debug_log("Sending buffer to: %lli\n", userId);
+	
 	return lobbies->send_network_message(lobbies, discord.lobby.id, userId, reliable, buff.data, buff.head);
 }
 
@@ -309,7 +320,11 @@ void discord_update_activity(void) {
 		activity.party.size.max_size = discord.lobby.capacity;
 		
 		snprintf(activity.party.id, sizeof activity.party.id, "%lli", discord.lobby.id);
-		strncpy(activity.secrets.join, discord.lobby.secret, 128);
+		
+		char secret[128];
+		assert_result_void(lobbies->get_lobby_activity_secret(lobbies, discord.lobby.id, &secret));
+		
+		strncpy(activity.secrets.join, secret, 128);
 	}
 	
 	activities->update_activity(activities, &activity, NULL, discord_callback_on_activity_update);
@@ -340,7 +355,7 @@ b32 discord_exit_lobby(void) {
 	
 	if (!discord.lobbynet.host) {
 		
-		assert_result_void(lobbies->disconnect_network(lobbies, discord.lobby.id));
+		assert_result(lobbies->disconnect_network(lobbies, discord.lobby.id));
 		lobbies->disconnect_lobby(lobbies, discord.lobby.id, NULL, discord_callback_on_lobby_disconnect);
 		
 	} else if (discord.lobbynet.userCount > 1) {
@@ -352,7 +367,7 @@ b32 discord_exit_lobby(void) {
 		lobbies->update_lobby(lobbies, discord.lobby.id, transaction, NULL, discord_callback_lobby_disconnect_as_host);
 		
 	} else {
-		assert_result_void(lobbies->disconnect_network(lobbies, discord.lobby.id));
+		assert_result(lobbies->disconnect_network(lobbies, discord.lobby.id));
 		lobbies->delete_lobby(lobbies, discord.lobby.id, NULL, discord_callback_lobby_delete);
 	}
 	
@@ -375,9 +390,10 @@ b32 discord_toggle_lobby_lock(void) {
 b32 discord_send_buffer(Buffer buff, b32 reliable) {
 	if (discord.lobby.id == 0 || discord.joining) return false;
 	
-	if (!discord.lobbynet.host) {
+	reliable = !!reliable; // just to be safe
+	
+	if (!discord.lobbynet.host)
 		return discord_send_buffer_to_user(buff, reliable, discord.lobby.owner_id);
-	}
 	
 	for (usize i = 0; i < discord.lobbynet.userCount; ++i) {
 		if (discord.lobbynet.users[i].id == discord.user.id) continue;
@@ -386,6 +402,14 @@ b32 discord_send_buffer(Buffer buff, b32 reliable) {
 	}
 	
 	return true;
+}
+
+b32 discord_is_connected_to_lobby(void) {
+	return discord.connected && discord.lobby.id != 0;
+}
+
+b32 discord_am_the_owner(void) {
+	return discord_is_connected_to_lobby() && discord.lobbynet.host;
 }
 
 #undef assert_result
