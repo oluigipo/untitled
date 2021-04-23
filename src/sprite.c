@@ -5,6 +5,8 @@ internal struct SpriteRenderingStuff {
 	Uniform uTexture;
 } spriteRendering;
 
+internal SpriteBatch spriteGlobalBatch = { 0 };
+
 void sprite_rendering_init(void) {
 	spriteRendering.shader = shader_load("res/sprite");
 	spriteRendering.uTexture = shader_uniform(spriteRendering.shader, "uTexture");
@@ -107,6 +109,9 @@ void sprite_render_ext(const Sprite* spr_, const mat4 where, u32 blending, u32 f
 
 //~ Sprite Batching
 void sprite_batch_init(SpriteBatch* batch, usize cap) {
+	if (!batch)
+		batch = &spriteGlobalBatch;
+	
 	batch->cap = cap;
 	batch->len = 0;
 	batch->texture = NULL;
@@ -114,17 +119,25 @@ void sprite_batch_init(SpriteBatch* batch, usize cap) {
 }
 
 void sprite_batch_reserve_more(SpriteBatch* batch, usize count) {
+	if (!batch)
+		batch = &spriteGlobalBatch;
+	
 	usize newcap = batch->cap + count;
 	void* newptr = stack_alloc(&game.frameStack, sizeof(batch->elements[0]) * newcap);
 	
-	memcpy(newptr, batch->elements, sizeof(batch->elements[0]) * batch->len);
-	stack_free(&game.frameStack, batch->elements);
+	if (batch->elements) {
+		memcpy(newptr, batch->elements, sizeof(batch->elements[0]) * batch->len);
+		stack_free(&game.frameStack, batch->elements);
+	}
 	
 	batch->elements = newptr;
 	batch->cap = newcap;
 }
 
 void sprite_batch_add(SpriteBatch* batch, const Sprite* spr_, const mat4 where, u32 blending, u32 frame, u32 flags) {
+	if (!batch)
+		batch = &spriteGlobalBatch;
+	
 	// Check for texture
 	if (!batch->texture) {
 		batch->texture = spr_->texture;
@@ -178,6 +191,9 @@ void sprite_batch_add(SpriteBatch* batch, const Sprite* spr_, const mat4 where, 
 }
 
 void sprite_batch_flush(SpriteBatch* batch) {
+	if (!batch)
+		batch = &spriteGlobalBatch;
+	
 	if (batch->len > 0)
 		sprite_batch_render(batch);
 	
@@ -186,8 +202,10 @@ void sprite_batch_flush(SpriteBatch* batch) {
 }
 
 void sprite_batch_render(const SpriteBatch* batch) {
-	uint vbo, vao;
+	if (!batch)
+		batch = &spriteGlobalBatch;
 	
+	uint vbo, vao;
 	uint quadVbo = shapes_quad();
 	
 	glGenVertexArrays(1, &vao);
@@ -239,7 +257,12 @@ void sprite_batch_render(const SpriteBatch* batch) {
 }
 
 void sprite_batch_done(SpriteBatch* batch) {
-	stack_free(&game.frameStack, batch->elements);
+	if (!batch)
+		batch = &spriteGlobalBatch;
+	
+	if (batch->elements)
+		stack_free(&game.frameStack, batch->elements);
+	
 	batch->elements = NULL;
 	batch->len = batch->cap = 0;
 	batch->texture = NULL;

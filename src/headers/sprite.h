@@ -27,6 +27,7 @@ struct SpriteBatchElement {
 	mat4 where;
 };
 
+// Can be safely zero-initialized
 struct SpriteBatch {
 	struct SpriteBatchElement* elements;
 	usize len;
@@ -34,6 +35,11 @@ struct SpriteBatch {
 	Texture* texture;
 } typedef SpriteBatch;
 
+// NOTE(luigi): all the 'batch' parameters of those functions can be NULL. If it's NULL,
+//              then they are going to affect the global sprite batch.
+//
+//              The global sprite batch is flushed and done'd when 'engine_end_frame()'
+//              is called.
 void sprite_batch_init(SpriteBatch* batch, usize cap);
 void sprite_batch_reserve_more(SpriteBatch* batch, usize count);
 void sprite_batch_add(SpriteBatch* batch, const Sprite* spr, const mat4 where, u32 blending, u32 frame, u32 flags);

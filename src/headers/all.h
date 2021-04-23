@@ -23,3 +23,4 @@
 #include "headers/tilemap.h"
 #include "headers/sprite.h"
 #include "headers/primitives.h"
+#include "headers/buffer.h"

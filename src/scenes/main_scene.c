@@ -63,9 +63,6 @@ uint scene_main(void) {
 		.data = tilemapData
 	};
 	
-	// Batch Renderer
-	SpriteBatch sprbatch;
-	
 	// Ghosts
 	struct { vec3 position; u32 blend; } ghosts[100];
 	const usize ghostCount = sizeof(ghosts) / sizeof(ghosts[0]);
@@ -136,7 +133,6 @@ uint scene_main(void) {
 		
 		mat4 view;
 		camera_matrix(&camera, view);
-		sprite_batch_init(&sprbatch, 1);
 		
 		// Draw Tilemap
 		glm_mat4_identity(object);
@@ -151,7 +147,7 @@ uint scene_main(void) {
 			glm_scale(object, (vec3) { 2, 2 });
 			glm_mul(view, object, object);
 			
-			sprite_batch_add(&sprbatch, &ghostSprite, object, ghosts[i].blend, 0, ALIGNMENT_NONE);
+			sprite_batch_add(NULL, &ghostSprite, object, ghosts[i].blend, 0, ALIGNMENT_NONE);
 		}
 		
 		// Draw walle
@@ -159,10 +155,10 @@ uint scene_main(void) {
 		glm_translate(object, (vec3) { position[0], position[1] });
 		glm_mat4_mul(view, object, object);
 		
-		sprite_batch_add(&sprbatch, &walleSprite, object, 0xFFFFFFFF, 0, ALIGNMENT_CENTER | ALIGNMENT_MIDDLE);
+		sprite_batch_add(NULL, &walleSprite, object, 0xFFFFFFFF, 0, ALIGNMENT_CENTER | ALIGNMENT_MIDDLE);
 		
 		// Finish Sprite Batching
-		sprite_batch_flush(&sprbatch);
+		sprite_batch_flush(NULL);
 		
 		// Draw text
 		unsigned char myText[512];
@@ -173,7 +169,7 @@ uint scene_main(void) {
 		
 		str.len += snprintf(myText + str.len, sizeof(myText) - str.len,
 							(discord.connected) ? "Discord: %.*s#%u" : "Connecting to Discord...",
-							discord.username.len, discord.username.ptr, discord.discriminator);
+							discord.user.username.len, discord.user.username.ptr, discord.user.discriminator);
 		
 		vec2u textusize;
 		text_size(str, textusize, &assets_textures[TEX_DEFAULT_FONT]);
@@ -186,7 +182,6 @@ uint scene_main(void) {
 		glm_mat4_mul(view, object, object);
 		primitive_render_roundrect(object, 0xFF202020, 1.0f, (vec2) { 1, textsize[1] / textsize[0] });
 		
-		
 		glm_mat4_identity(object);
 		glm_scale(object, (vec3) { 2, 2 });
 		glm_mul(view, object, object);
@@ -194,7 +189,6 @@ uint scene_main(void) {
 		
 		partmgr_render(&mgr, view);
 		
-		sprite_batch_done(&sprbatch);
 		engine_end_frame();
 	}
 	

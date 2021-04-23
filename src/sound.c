@@ -66,8 +66,7 @@ uint sound_load_file(const char* fname) {
 	alBufferData(bufferId, format, data, size, sampleRate);
 	
 	ALenum err = alGetError();
-    if(err != AL_NO_ERROR)
-    {
+    if(err != AL_NO_ERROR) {
         debug_error("OpenAL Error: %s\n", alGetString(err));
         if(bufferId && alIsBuffer(bufferId))
             alDeleteBuffers(1, &bufferId);

@@ -35,7 +35,11 @@ struct Stack {
 struct StackHeader {
 	struct StackHeader* previous;
 	usize size;
-};
+}
+#if X86
+__attribute__((aligned(16)))
+#endif
+;
 
 void stack_init(Stack* stack, usize size);
 void stack_deinit(Stack* stack);
@@ -58,7 +62,11 @@ struct MemoryPool {
 
 struct MemoryPoolHeader {
 	struct MemoryPoolHeader* next;
-};
+}
+#if X86
+__attribute__((aligned(16)))
+#endif
+;
 
 void pool_init(MemoryPool* pool, usize chunkSize, usize chunkCount);
 void pool_deinit(MemoryPool* pool);

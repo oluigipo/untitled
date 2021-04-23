@@ -2,6 +2,8 @@
 #include "types.h"
 #include "texture.h"
 
+// NOTE(luigi): should NEVER EVER be zero-initialized!
+//              use 'framebuffer_init()' for it!
 struct Framebuffer {
 	Texture tex;
 	uint id;

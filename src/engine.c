@@ -155,7 +155,12 @@ uint engine_init(const struct GameArgs* restrict args) {
 void engine_begin_frame(void) {
 	game.frameBegin = glfwGetTime();
 	game.deltaTime = (game.frameBegin - game.lastFrame) * FPS_DEFAULT;
-	game.deltaTime = glm_min(game.deltaTime, 5.0f);
+	game.deltaTime = glm_min(game.deltaTime, 4.0f);
+	if (game.deltaTime < 0.0f) {
+		debug_log("WHAT??????\n");
+		game.deltaTime = 1.0f;
+	}
+	
 	discord_update();
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, game.framebuffer.id);
@@ -167,6 +172,12 @@ void engine_begin_frame(void) {
 }
 
 void engine_end_frame(void) {
+	sprite_batch_flush(NULL);
+	sprite_batch_done(NULL);
+	
+	discord_late_update();
+	
+	// Finish it
 	++game.frameCount;
 	
 	// If 80% or more of it was used, double it's size, just to be safe.

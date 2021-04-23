@@ -46,7 +46,7 @@ void random_init(void) {
 
 // Generates a random number between 0 and 1
 f64 random_f64(void) {
-	return (f64)random_u64() / U64_MAX;
+	return (f64)random_u64() / (f64)U64_MAX;
 }
 
 // 32 bits version of random()

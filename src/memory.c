@@ -5,6 +5,9 @@
 #include "headers/os.h"
 
 //#define MEM_TRACK_HEAP_ALLOCATIONS
+#define ALIGNMENT (16-1)
+
+#define ALIGNUP(s) (((s)+ALIGNMENT) & ~ALIGNMENT)
 
 void* mem_alloc(usize size) {
 	void* ptr = malloc(size);
@@ -85,7 +88,7 @@ void arena_deinit(Arena* restrict arena) {
 }
 
 void* arena_alloc(Arena* restrict arena, usize size) {
-	size = (size + 7) & ~7; // 8 byte alignment
+	size = ALIGNUP(size);
 	
 	if (arena->head + size > arena->size) {
 		assert(!"Arena is full!");
@@ -98,7 +101,7 @@ void* arena_alloc(Arena* restrict arena, usize size) {
 }
 
 void* arena_alloc_zero(Arena* restrict arena, usize size) {
-	size = (size + 7) & ~7; // 8 byte alignment
+	size = ALIGNUP(size);
 	
 	if (arena->head + size > arena->size) {
 		assert(!"Arena is full!");
@@ -117,7 +120,7 @@ void arena_clear(Arena* restrict arena) {
 
 //~ Stack Allocator
 void stack_init(Stack* stack, usize size) {
-	size = (size + 7) & ~7;
+	size = ALIGNUP(size);
 	
 	stack->size = size;
 	stack->buffer = mem_alloc(size);
@@ -133,7 +136,7 @@ void stack_deinit(Stack* stack) {
 }
 
 void* stack_push(Stack* stack, usize size) {
-	size = (size + 7) & ~7;
+	size = ALIGNUP(size);
 	
 	struct StackHeader* previous = stack->header;
 	stack->header = (void*)((char*)(previous+1) + stack->header->size);
@@ -173,7 +176,7 @@ void stack_clear(Stack* stack) {
 
 //~ Pool Allocator
 void pool_init(MemoryPool* pool, usize chunkSize, usize chunkCount) {
-	chunkSize = (chunkSize + 7) & ~7;
+	chunkSize = ALIGNUP(chunkSize);
 	
 	pool->size = chunkSize;
 	pool->count = chunkCount;

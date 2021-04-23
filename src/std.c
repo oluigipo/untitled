@@ -75,7 +75,7 @@ u32 string_utf8_next_char(stringUTF8* str) {
 		
 		if (ext == 0) return 0;
 		
-		result |= ch >> ext+2;
+		result |= ch >> (ext+2);
 		ch = *++ptr;
 		
 		while (ext --> 0) {
