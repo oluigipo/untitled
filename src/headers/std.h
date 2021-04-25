@@ -74,11 +74,11 @@ typedef List(void) List_generic; // Basic type for functions
 
 // More math stuff
 internal inline f32 lerpf(f32 a, f32 b, f32 t) {
-	return (b - a) * t + a;
+	return b * t + a * (1-t);
 }
 
 internal inline f32 lerp(f64 a, f64 b, f64 t) {
-	return (b - a) * t + a;
+	return b * t + a * (1-t);
 }
 
 // Hashing. Both of them are case insensetive.

@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 	game.currentScene = FIRST_SCENE;
 	do {
 		result = game.currentScene();
-	} while (game.currentScene && result == 0);
+	} while (game.currentScene && result == 0 && !glfwWindowShouldClose(game.apiWindow));
 	
 	engine_deinit();
 	return result;

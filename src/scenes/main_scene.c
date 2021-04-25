@@ -1,4 +1,5 @@
 #include "headers/all.h"
+#include <math.h>
 
 /*
 
@@ -10,59 +11,16 @@
 
 */
 
-internal b32 walleShouldUpdate = false;
-internal vec2 walleNewPosition;
-
-internal void network_on_buffer(void* _, i64 lobbyId, i64 userId, u8 channel, Buffer* buff) {
-	u16 kind = buffer_read_u16(buff);
-	
-	switch (kind) {
-		case 1: {
-			
-			walleShouldUpdate = true;
-			
-			walleNewPosition[0] = buffer_read_f32(buff);
-			walleNewPosition[1] = buffer_read_f32(buff);
-			
-		} break;
-	}
-}
-
 uint scene_main(void) {
 	mat4 object;
-	discord.on_buffer = network_on_buffer;
-	
-	// Walle things
-	vec2 position = { 0 };
-	vec2 velocity = { 0 };
-	Sprite walleSprite = {
-		.texture = &assets_textures[TEX_SPRITES_0],
-		.offset = { 0, 16 },
-		.size = { 128, 128 }
-	};
-	
-	// Particles
-	ParticleManager mgr = { 0 };
 	
 	// Camera
 	struct Camera camera = {
-		.pos = { position[0], position[1] },
+		.pos = { 0 },
 		.angle = 0,
 		.zoom = 2.0f / SCREEN_SCALE,
-		.speed = 0.3f
+		.speed = 0.2f
 	};
-	
-	// Music
-	uint buffer = sound_load_file("assets/test.ogg");
-	uint source = sound_make_source();
-	
-	sound_source_buffer(source, buffer);
-	sound_source_attenuation(source, 1.0f, 300.0f, 10000.0f);
-	sound_source_params(source, 0.2f, 1.0f);
-	sound_source_position(source, (vec3) { 0, 0, -300.0f });
-	sound_play_source(source);
-	
-	b32 playingSound = true;
 	
 	// Tilemap
 	u16 tilemapData[8*8] = {
@@ -82,90 +40,24 @@ uint scene_main(void) {
 		.data = tilemapData
 	};
 	
-	// Ghosts
-	struct { vec3 position; u32 blend; } ghosts[100];
-	const usize ghostCount = sizeof(ghosts) / sizeof(ghosts[0]);
-	
-	Sprite ghostSprite = {
+	// Selected Block
+	Sprite spriteSelected = {
 		.texture = &assets_textures[TEX_SPRITES_0],
-		.offset = { 0, 0 },
-		.size = { 16, 16 }
+		.size = { 16, 16 },
+		.offset = { 16, 0 }
 	};
-	
-	for (uint i = 0; i < ghostCount; ++i) {
-		ghosts[i].position[0] = (random_f64() * 2 - 1) * 500.0f;
-		ghosts[i].position[1] = (random_f64() * 2 - 1) * 500.0f;
-		ghosts[i].position[2] = 0;
-		
-		switch (random_u32() % 3) {
-			case 0: ghosts[i].blend = 0xFF8888FF; break;
-			case 1: ghosts[i].blend = 0xFF88FF88; break;
-			case 2: ghosts[i].blend = 0xFFFF8888; break;
-		}
-	}
 	
 	// Game Loop
 	while (!glfwWindowShouldClose(game.apiWindow)) {
 		engine_begin_frame();
 		
 		//- Update
-		if (keyboard_is_pressed(GLFW_KEY_O)) {
-			if (discord_is_connected_to_lobby())
-				discord_exit_lobby();
-			else
-				discord_create_lobby();
-		}
-		
-		if (keyboard_is_pressed(GLFW_KEY_P)) {
-			u8 buffer[128];
-			Buffer buff = buffer_from(buffer, sizeof buffer);
-			
-			buffer_write_u16(&buff, 1);
-			buffer_write_f32(&buff, position[0]);
-			buffer_write_f32(&buff, position[1]);
-			
-			discord_send_buffer(buff, true);
-		}
-		
-		if (keyboard_is_pressed(GLFW_KEY_TAB)) {
-			playingSound = !playingSound;
-			
-			if (playingSound) sound_play_source(source);
-			else sound_pause_source(source);
-		}
-		
 		if (gamepad_is_pressed(GPAD_BUTTON_START))
 			glfwSetWindowShouldClose(game.apiWindow, true);
 		
-		if (walleShouldUpdate) {
-			glm_vec2_copy(walleNewPosition, position);
-		}
+		camera.targetPos[0] += (keyboard_is_down(GLFW_KEY_D) - keyboard_is_down(GLFW_KEY_A)) * 3.0f * game.deltaTime;
+		camera.targetPos[1] += (keyboard_is_down(GLFW_KEY_S) - keyboard_is_down(GLFW_KEY_W)) * 3.0f * game.deltaTime;
 		
-		f32 targetSpeed = 3.0f + 2.0f * gamepad_axis(GPAD_AXIS_R2);
-		velocity[0] = lerpf(velocity[0], gamepad_axis(GPAD_AXIS_LX) * targetSpeed, 0.3f * game.deltaTime);
-		velocity[1] = lerpf(velocity[1], gamepad_axis(GPAD_AXIS_LY) * targetSpeed, 0.3f * game.deltaTime);
-		
-		position[0] += velocity[0] * game.deltaTime;
-		position[1] += velocity[1] * game.deltaTime;
-		
-		sound_listener_position((vec3) { position[0], position[1] });
-		
-		if (gamepad_is_down(GPAD_BUTTON_A)) {
-			f32 scale = random_f64() * 0.5f + 0.5f;
-			
-			partmgr_add(&mgr, PART_SIMPLE, &(struct PartSimple) {
-							.pos = { position[0], position[1] },
-							.scale = { scale, scale },
-							.speed = { random_f64() * 18.0 - 8.0f, random_f64() * 16.0f - 8.0f },
-							.color = { random_f64(), random_f64(), random_f64() },
-							.alpha = 1.0f,
-							.angle = random_f64() * TAU
-						});
-		}
-		
-		partmgr_update(&mgr);
-		
-		glm_vec2_copy(position, camera.targetPos);
 		camera_update(&camera);
 		
 		//- Draw
@@ -177,64 +69,32 @@ uint scene_main(void) {
 		
 		// Draw Tilemap
 		glm_mat4_identity(object);
-		glm_translate(object, (vec3) { -200.0f, -200.0f });
+		glm_scale(object, (vec3) { 2, 2 });
+		glm_translate(object, (vec3) { -(f32)tilemap.size[0] / 2.0f * tilemap.texture->size[0], -(f32)tilemap.size[1] / 2.0f * tilemap.texture->size[1] });
 		glm_mat4_mul(view, object, object);
 		tilemap_render(&tilemap, object);
 		
-		// Sprite
-		for (uint i = 0; i < ghostCount; ++i) {
-			glm_mat4_identity(object);
-			glm_translate(object, ghosts[i].position);
-			glm_scale(object, (vec3) { 2, 2 });
-			glm_mul(view, object, object);
-			
-			sprite_batch_add(NULL, &ghostSprite, object, ghosts[i].blend, 0, ALIGNMENT_NONE);
-		}
+		// Draw Selected Tile
+		vec2 mousePos;
+		camera_mouse_pos(&camera, mousePos);
 		
-		// Draw walle
+		f32 tilewidth = tilemap.texture->size[0] * 2.0f;
+		f32 tileheight = tilemap.texture->size[1] * 2.0f;
+		
+		mousePos[0] = floorf(mousePos[0] / tilewidth) * tilewidth + tilewidth / 2;
+		mousePos[1] = floorf(mousePos[1] / tileheight) * tileheight + tileheight / 2;
+		
+		f32 scale = 2.2f + sinf(game.frameCount * 0.2f) * 0.1f;
+		
 		glm_mat4_identity(object);
-		glm_translate(object, (vec3) { position[0], position[1] });
+		glm_translate(object, (vec3) { mousePos[0], mousePos[1] });
+		glm_scale(object, (vec3) { scale, scale });
 		glm_mat4_mul(view, object, object);
+		sprite_batch_add(NULL, &spriteSelected, object, 0xFFFFFFFF, 0, ALIGNMENT_MIDDLE | ALIGNMENT_CENTER);
 		
-		sprite_batch_add(NULL, &walleSprite, object, 0xFFFFFFFF, 0, ALIGNMENT_CENTER | ALIGNMENT_MIDDLE);
-		
-		// Finish Sprite Batching
-		sprite_batch_flush(NULL);
-		
-		// Draw text
-		unsigned char myText[512];
-		string str = { .ptr = myText };
-		str.len = snprintf(myText, sizeof myText,
-						   "%.*s \x01\n",
-						   strfmt(locale_str(TXT_HELLO_WORLD)));
-		
-		str.len += snprintf(myText + str.len, sizeof(myText) - str.len,
-							(discord.connected) ? "Discord: %.*s#%u" : "Connecting to Discord...",
-							discord.user.username.len, discord.user.username.ptr, discord.user.discriminator);
-		
-		vec2u textusize;
-		text_size(str, textusize, &assets_textures[TEX_DEFAULT_FONT]);
-		vec2 textsize = { textusize[0], textusize[1] };
-		glm_vec2_scale(textsize, 2.25f, textsize);
-		
-		glm_mat4_identity(object);
-		glm_scale(object, textsize);
-		glm_translate(object, (vec3) { -0.5f, -0.5f });
-		glm_mat4_mul(view, object, object);
-		primitive_render_roundrect(object, 0xFF202020, 1.0f, (vec2) { 1, textsize[1] / textsize[0] });
-		
-		glm_mat4_identity(object);
-		glm_scale(object, (vec3) { 2, 2 });
-		glm_mul(view, object, object);
-		text_render_ext(str, object, &assets_textures[TEX_DEFAULT_FONT], NULL, ALIGNMENT_CENTER | ALIGNMENT_MIDDLE);
-		
-		partmgr_render(&mgr, view);
-		
+		//- Finish Frame
 		engine_end_frame();
 	}
-	
-	sound_delete_source(source);
-	sound_unload(buffer);
 	
 	// Close the game
 	game.currentScene = NULL;

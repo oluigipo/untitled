@@ -43,7 +43,21 @@ internal struct IDiscordApplicationManager* application;
 internal struct IDiscordLobbyManager* lobbies;
 internal DiscordBranch branch;
 
-struct DiscordGlobalStuff discord;
+struct DiscordGlobalStuff discord = {
+	.activity = {
+		.type = DiscordActivityType_Playing,
+		.application_id = APPLICATION_ID,
+		.name = "Test 1",
+		.state = "Test 2",
+		.details = "Test 3",
+		.assets = {
+			.large_image = "eredin",
+			.large_text = "large text",
+			.small_image = "preto",
+			.small_text = "small text"
+		}
+	}
+};
 
 //- Callbacks
 internal void discord_update_lobby_users(void) {
@@ -172,7 +186,7 @@ internal void discord_callback_on_network_message(void* _data, i64 lobbyId, i64 
 	
 	if (discord.on_buffer) {
 		do {
-			discord.on_buffer(data, lobbyId, userId, channel, &buff);
+			discord.on_buffer(userId, &buff);
 		} while (buff.head != 0);
 	}
 }
@@ -301,33 +315,19 @@ void discord_late_update(void) {
 }
 
 void discord_update_activity(void) {
-	struct DiscordActivity activity = {
-		.type = DiscordActivityType_Playing,
-		.application_id = APPLICATION_ID,
-		.name = "Test 1",
-		.state = "Test 2",
-		.details = "Test 3",
-		.assets = {
-			.large_image = "eredin",
-			.large_text = "large text",
-			.small_image = "preto",
-			.small_text = "small text"
-		}
-	};
-	
 	if (discord.lobby.id != 0) {
-		activity.party.size.current_size = discord.lobbynet.userCount;
-		activity.party.size.max_size = discord.lobby.capacity;
+		discord.activity.party.size.current_size = discord.lobbynet.userCount;
+		discord.activity.party.size.max_size = discord.lobby.capacity;
 		
-		snprintf(activity.party.id, sizeof activity.party.id, "%lli", discord.lobby.id);
+		snprintf(discord.activity.party.id, sizeof discord.activity.party.id, "%lli", discord.lobby.id);
 		
 		char secret[128];
 		assert_result_void(lobbies->get_lobby_activity_secret(lobbies, discord.lobby.id, &secret));
 		
-		strncpy(activity.secrets.join, secret, 128);
+		strncpy(discord.activity.secrets.join, secret, 128);
 	}
 	
-	activities->update_activity(activities, &activity, NULL, discord_callback_on_activity_update);
+	activities->update_activity(activities, &discord.activity, NULL, discord_callback_on_activity_update);
 }
 
 b32 discord_create_lobby(void) {

@@ -17,7 +17,7 @@ SpriteRenderable sprite_craft(const Sprite* base) {
 	return (SpriteRenderable) {
 		.texture = base->texture,
 		.texcoords = {
-			(f32)base->offset[0] / (f32)base->texture->size[0],
+			-(f32)base->offset[0] / (f32)base->texture->size[0],
 			1.0 - (f32)base->offset[1] / (f32)base->texture->size[1]
 		},
 		.size = {

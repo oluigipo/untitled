@@ -21,3 +21,12 @@ void camera_matrix(struct Camera* restrict cam, mat4 out) {
 	glm_mat4_mul(game.projection, out, out);
 }
 
+void camera_mouse_pos(struct Camera* restrict cam, vec2 out) {
+	// TODO(luigi): make it work with rotation
+	
+	f32 x = mouse.pos[0] - game.window.width / 2;
+	f32 y = mouse.pos[1] - game.window.height / 2;
+	
+	out[0] = x / (cam->zoom / SCREEN_SCALE) + cam->pos[0];
+	out[1] = y / (cam->zoom / SCREEN_SCALE) + cam->pos[1];
+}

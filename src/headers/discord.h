@@ -12,12 +12,15 @@ struct DiscordClientUser {
 	u32 discriminator;
 };
 
+typedef void (*DiscordBufferCallback)(i64 user, Buffer* buffer);
+
 // Globals
 global struct DiscordGlobalStuff {
 	b32 connected;
 	b32 joining;
-	void (*on_buffer)(void*, i64, i64, u8, Buffer*);
+	DiscordBufferCallback on_buffer;
 	
+	struct DiscordActivity activity;
 	struct DiscordLobby lobby;
 	struct DiscordClientUser user;
 	struct {
