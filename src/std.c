@@ -1,6 +1,6 @@
 #include "headers/std.h"
 
-usize string_utf8_len(stringUTF8 str) {
+func usize string_utf8_len(stringUTF8 str) {
 	usize len = 0;
 	uint ext = 0;
 	const u8* end = str.ptr + str.size;
@@ -49,7 +49,7 @@ usize string_utf8_len(stringUTF8 str) {
 	return len;
 }
 
-u32 string_utf8_char_at(stringUTF8 str, usize index) {
+func u32 string_utf8_char_at(stringUTF8 str, usize index) {
 	u32 result = 0;
 	
 	while (index > 0) {
@@ -60,7 +60,7 @@ u32 string_utf8_char_at(stringUTF8 str, usize index) {
 	return result;
 }
 
-u32 string_utf8_next_char(stringUTF8* str) {
+func u32 string_utf8_next_char(stringUTF8* str) {
 	if (str->size == 0) return 0;
 	
 	u32 result = 0;
@@ -101,11 +101,11 @@ u32 string_utf8_next_char(stringUTF8* str) {
 	return result;
 }
 
-usize string_utf8_write_char(u8* str, usize max, u32 ch) {
+func usize string_utf8_write_char(u8* str, usize max, u32 ch) {
 	// TODO
 }
 
-u64 hash_of_cstr(const char* str) {
+func u64 hash_of_cstr(const char* str) {
 	u64 hash = 2166136261ull;
 	
 	while (*str) {
@@ -120,7 +120,7 @@ u64 hash_of_cstr(const char* str) {
 	return hash;
 }
 
-u64 hash_of_str(string str) {
+func u64 hash_of_str(string str) {
 	u64 hash = 2166136261ull;
 	usize i = 0;
 	
@@ -149,35 +149,35 @@ internal usize usize_max(usize a, usize b) {
 }
 
 // 'struct string' functions
-string string_from_cstr_len(const char* restrict ptr, usize len) {
+func string string_from_cstr_len(const char* restrict ptr, usize len) {
 	return (string) {
 		.len = len,
 		.ptr = ptr
 	};
 }
 
-string string_from_cstr(const char* restrict ptr) {
+func string string_from_cstr(const char* restrict ptr) {
 	return (string) {
 		.len = strlen(ptr),
 		.ptr = ptr
 	};
 }
 
-string string_from_strbuf(const strbuf* restrict buf) {
+func string string_from_strbuf(const strbuf* restrict buf) {
 	return (string) {
 		.len = buf->len,
 		.ptr = buf->data
 	};
 }
 
-string string_from_strbuf_slice(const strbuf* restrict buf, usize begin, usize count) {
+func string string_from_strbuf_slice(const strbuf* restrict buf, usize begin, usize count) {
 	return (string) {
 		.len = count,
 		.ptr = buf->data + begin
 	};
 }
 
-string string_copy_from_strbuf(const strbuf* restrict buf) {
+func string string_copy_from_strbuf(const strbuf* restrict buf) {
 	char* ptr = mem_alloc((buf->len + 1) * sizeof(char));
 	
 	memcpy(ptr, buf->data, buf->len * sizeof(char));
@@ -189,7 +189,7 @@ string string_copy_from_strbuf(const strbuf* restrict buf) {
 	};
 }
 
-string string_copy(string other) {
+func string string_copy(string other) {
 	char* ptr = mem_alloc((other.len + 1) * sizeof(char));
 	
 	memcpy(ptr, other.ptr, other.len * sizeof(char));
@@ -201,20 +201,20 @@ string string_copy(string other) {
 	};
 }
 
-void string_free(string str) {
+func void string_free(string str) {
 	mem_free((void*)str.ptr);
 }
 
-int string_compare(string a, string b) {
+func int string_compare(string a, string b) {
 	return strncmp(a.ptr, b.ptr, usize_max(a.len, b.len));
 }
 
-int string_compare_range(string a, usize begin_a, string b, usize begin_b, usize count) {
+func int string_compare_range(string a, usize begin_a, string b, usize begin_b, usize count) {
 	return strncmp(a.ptr + begin_a, b.ptr + begin_b, count);
 }
 
 // 'struct strbuf' functions
-strbuf* strbuf_make(usize cap) {
+func strbuf* strbuf_make(usize cap) {
 	strbuf* result = mem_alloc(sizeof(strbuf) + (cap+1) * sizeof(char));
 	result->cap = cap;
 	result->len = 0;
@@ -223,11 +223,11 @@ strbuf* strbuf_make(usize cap) {
 	return result;
 }
 
-void strbuf_free(strbuf* restrict buf) {
+func void strbuf_free(strbuf* restrict buf) {
 	mem_free(buf);
 }
 
-usize strbuf_reserve(strbuf* restrict* restrict buf, usize newcap) {
+func usize strbuf_reserve(strbuf* restrict* restrict buf, usize newcap) {
 	if ((*buf)->cap >= newcap)
 		return (*buf)->cap;
 	
@@ -238,7 +238,7 @@ usize strbuf_reserve(strbuf* restrict* restrict buf, usize newcap) {
 	return newbuf->cap;
 }
 
-usize strbuf_append(strbuf* restrict* restrict buf, string str) {
+func usize strbuf_append(strbuf* restrict* restrict buf, string str) {
 	usize desired_length = (*buf)->len + str.len;
 	
 	if (strbuf_reserve(buf, desired_length) < desired_length)
@@ -251,15 +251,15 @@ usize strbuf_append(strbuf* restrict* restrict buf, string str) {
 	return desired_length;
 }
 
-usize strbuf_append_cstr(strbuf* restrict* restrict buf, const char* restrict str) {
+func usize strbuf_append_cstr(strbuf* restrict* restrict buf, const char* restrict str) {
 	return strbuf_append(buf, string_from_cstr(str));
 }
 
-usize strbuf_append_strbuf(strbuf* restrict* restrict buf, const strbuf* restrict other) {
+func usize strbuf_append_strbuf(strbuf* restrict* restrict buf, const strbuf* restrict other) {
 	return strbuf_append(buf, string_from_strbuf(other));
 }
 
-strbuf* strbuf_copy(const strbuf* restrict buf) {
+func strbuf* strbuf_copy(const strbuf* restrict buf) {
 	strbuf* result = strbuf_make(buf->cap);
 	memcpy(result->data, buf->data, buf->len);
 	result->len = buf->len;
@@ -268,12 +268,12 @@ strbuf* strbuf_copy(const strbuf* restrict buf) {
 	return result;
 }
 
-void strbuf_rewind(strbuf* restrict buf) {
+func void strbuf_rewind(strbuf* restrict buf) {
 	buf->len = 0;
 	buf->data[0] = 0;
 }
 
-usize strbuf_rollback(strbuf* restrict buf, usize amount) {
+func usize strbuf_rollback(strbuf* restrict buf, usize amount) {
 	if (amount >= buf->len) {
 		buf->len = 0;
 		buf->data[0] = 0;
@@ -285,7 +285,7 @@ usize strbuf_rollback(strbuf* restrict buf, usize amount) {
 	return buf->len;
 }
 
-usize strbuf_weak_append(strbuf* restrict* restrict buf, string str) {
+func usize strbuf_weak_append(strbuf* restrict* restrict buf, string str) {
 	usize desired_length = usize_min((*buf)->len + str.len, (*buf)->cap);
 	if (desired_length <= (*buf)->len)
 		return (*buf)->len;
@@ -296,22 +296,22 @@ usize strbuf_weak_append(strbuf* restrict* restrict buf, string str) {
 	return desired_length;
 }
 
-usize strbuf_weak_append_cstr(strbuf* restrict* restrict buf, const char* restrict str) {
+func usize strbuf_weak_append_cstr(strbuf* restrict* restrict buf, const char* restrict str) {
 	return strbuf_weak_append(buf, string_from_cstr(str));
 }
 
-usize strbuf_weak_append_strbuf(strbuf* restrict* restrict buf, const strbuf* restrict other) {
+func usize strbuf_weak_append_strbuf(strbuf* restrict* restrict buf, const strbuf* restrict other) {
 	return strbuf_weak_append(buf, string_from_strbuf(other));
 }
 
 // List
-void __list_init(List_generic* list, usize cap, usize size) {
+func void __list_init(List_generic* list, usize cap, usize size) {
 	list->ptr = mem_alloc(size * cap);
 	list->len = 0;
 	list->cap = cap;
 }
 
-usize __list_reserve(List_generic* list, usize newcap, usize size) {
+func usize __list_reserve(List_generic* list, usize newcap, usize size) {
 	if (list->cap >= newcap)
 		return list->cap;
 	

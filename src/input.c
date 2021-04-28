@@ -41,13 +41,13 @@ internal void input_update_gamepad(void) {
 		glm_vec2_normalize(gamepad.state.axes + 2);
 }
 
-void input_init(void) {
+func void input_init(void) {
 	glfwSetKeyCallback(game.apiWindow, glfwcallback_key_update);
 	glfwSetMouseButtonCallback(game.apiWindow, glfwcallback_mouse_update);
 	glfwSetScrollCallback(game.apiWindow, glfwcallback_scroll_update);
 }
 
-void input_update(void) {
+func void input_update(void) {
 	memcpy(keyboard.oldKey, keyboard.key, sizeof(keyboard.key));
 	memcpy(mouse.oldButton, mouse.button, sizeof(mouse.button));
 	gamepad.oldState = gamepad.state;
@@ -92,7 +92,7 @@ void input_update(void) {
 	}
 }
 
-void input_map_to_gamepad(void) {
+func void input_map_to_gamepad(void) {
 	// TODO(luigi): convert input from the keyboard to gamepad.
 	gamepad.state = (GLFWgamepadstate) { 0 };
 	
@@ -118,7 +118,7 @@ void input_map_to_gamepad(void) {
 	gamepad.state.buttons[GPAD_BUTTON_START] = keyboard_is_down(GLFW_KEY_ESCAPE);
 }
 
-int input_check_for_gamepad(void) {
+func int input_check_for_gamepad(void) {
 	for (int id = GLFW_JOYSTICK_1; id <= GLFW_JOYSTICK_LAST; ++id) {
 		if (glfwJoystickPresent(id) && glfwJoystickIsGamepad(id))
 			return id;

@@ -1,3 +1,4 @@
+#include "headers/opengl.h"
 #include "headers/std.h"
 #include "headers/global.h"
 #include "headers/memory.h"
@@ -5,7 +6,6 @@
 #include "headers/engine.h"
 #include "headers/file.h"
 #include "headers/input.h"
-#include "headers/opengl.h"
 #include "headers/os.h"
 #include "headers/random.h"
 #include "headers/scenes.h"
@@ -24,3 +24,4 @@
 #include "headers/sprite.h"
 #include "headers/primitives.h"
 #include "headers/buffer.h"
+#include "headers/collision.h"

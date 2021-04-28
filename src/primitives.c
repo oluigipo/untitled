@@ -10,7 +10,7 @@ internal struct PrimitiveRenderingStuff {
 	Uniform roundrectuScale;
 } primitiveRendering;
 
-void primitive_rendering_init(void) {
+func void primitive_rendering_init(void) {
 	Shader shader;
 	
 	shader = shader_load("res/roundrect");
@@ -36,11 +36,11 @@ void primitive_rendering_init(void) {
 	glBindVertexArray(0);
 }
 
-void primitive_render_rect(const mat4 where, u32 color) {
+func void primitive_render_rect(const mat4 where, u32 color) {
 	primitive_render_roundrect(where, color, 0.0f, (vec2) { 1.0f, 1.0f });
 }
 
-void primitive_render_roundrect(const mat4 where, u32 color, f32 roundness, vec2 scale) {
+func void primitive_render_roundrect(const mat4 where, u32 color, f32 roundness, vec2 scale) {
 	vec4 colorvec;
 	argb_to_color(color, colorvec);
 	
@@ -58,7 +58,7 @@ void primitive_render_roundrect(const mat4 where, u32 color, f32 roundness, vec2
 	glBindVertexArray(0);
 }
 
-void primitive_render_ellipse(const mat4 where, u32 color) {
+func void primitive_render_ellipse(const mat4 where, u32 color) {
 	
 }
 

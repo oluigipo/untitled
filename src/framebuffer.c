@@ -1,6 +1,6 @@
 #include "headers/all.h"
 
-void framebuffer_init(Framebuffer* fb, const vec2u size) {
+func void framebuffer_init(Framebuffer* fb, const vec2u size) {
 	fb->tex.size[0] = size[0];
 	fb->tex.size[1] = size[1];
 	fb->tex.depth = 0;
@@ -29,14 +29,14 @@ void framebuffer_init(Framebuffer* fb, const vec2u size) {
 		glBindFramebuffer(GL_FRAMEBUFFER, game.framebufferStack[game.framebufferStackSize-1]->id);
 }
 
-void framebuffer_deinit(Framebuffer* fb) {
+func void framebuffer_deinit(Framebuffer* fb) {
 	glDeleteTextures(1, &fb->tex.id);
 	glDeleteFramebuffers(1, &fb->id);
 	
 	*fb = (Framebuffer) { 0 };
 }
 
-Texture framebuffer_extract(Framebuffer* fb) {
+func Texture framebuffer_extract(Framebuffer* fb) {
 	Texture tex = fb->tex;
 	
 	glDeleteFramebuffers(1, &fb->id);
@@ -44,7 +44,7 @@ Texture framebuffer_extract(Framebuffer* fb) {
 	return tex;
 }
 
-void framebuffer_bind(Framebuffer* fb) {
+func void framebuffer_bind(Framebuffer* fb) {
 	assert(game.framebufferStackSize < sizeof(game.framebufferStack) / sizeof(*game.framebufferStack));
 	uint index = game.framebufferStackSize++;
 	game.framebufferStack[index] = fb;
@@ -53,7 +53,7 @@ void framebuffer_bind(Framebuffer* fb) {
 	glViewport(0, 0, fb->tex.size[0], fb->tex.size[1]);
 }
 
-void framebuffer_unbind(void) {
+func void framebuffer_unbind(void) {
 	assert(game.framebufferStackSize > 1);
 	Framebuffer* fb = game.framebufferStack[--game.framebufferStackSize - 1];
 	
@@ -61,7 +61,7 @@ void framebuffer_unbind(void) {
 	glViewport(0, 0, fb->tex.size[0], fb->tex.size[1]);
 }
 
-void framebuffer_resize(Framebuffer* fb, const vec2u size) {
+func void framebuffer_resize(Framebuffer* fb, const vec2u size) {
 	fb->tex.size[0] = size[0];
 	fb->tex.size[1] = size[1];
 	

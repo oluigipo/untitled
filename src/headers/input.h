@@ -74,8 +74,8 @@ global struct Keyboard keyboard;
 global struct Mouse mouse;
 global struct Gamepad gamepad;
 
-void input_init(void);
-void input_update(void);
-void input_map_to_gamepad(void);
-int input_check_for_gamepad(void);
+func void input_init(void);
+func void input_update(void);
+func void input_map_to_gamepad(void);
+func int input_check_for_gamepad(void);
 

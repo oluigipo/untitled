@@ -30,8 +30,8 @@ typedef struct ParticleManager {
 
 #undef _ParticleManager_field
 
-void partmgr_setup_rendering(void);
-void partmgr_add(ParticleManager* mgr, enum ParticleKind kind, void* partData);
-void partmgr_update(ParticleManager* mgr);
-void partmgr_render(ParticleManager* mgr, mat4 view);
+func void partmgr_setup_rendering(void);
+func void partmgr_add(ParticleManager* mgr, enum ParticleKind kind, void* partData);
+func void partmgr_update(ParticleManager* mgr);
+func void partmgr_render(ParticleManager* mgr, mat4 view);
 

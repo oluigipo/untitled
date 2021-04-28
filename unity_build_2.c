@@ -1,3 +1,5 @@
+#include "glad.c"
+
 #include "headers/memory.h"
 #include "headers/debug.h"
 
@@ -17,5 +19,4 @@ int fopen_s(FILE**,const char*,const char*);
 size_t strnlen(const char*,size_t l);
 #endif
 
-#include "discord.c"
 #include <stb_vorbis.h>

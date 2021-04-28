@@ -9,9 +9,9 @@ struct TextVertexInfo {
 	f32 chr;
 };
 
-void text_rendering_setup(void);
-uint text_render_to_texture(Texture* restrict output, string text, const Texture* restrict font, const uint* restrict colorData);
-uint text_render(string text, const mat4 where, const Texture* restrict font);
-uint text_render_ext(string text, const mat4 where, const Texture* restrict font, const uint* restrict colorData, u32 flags);
-void text_size(string text, vec2u out, const Texture* restrict font);
+func void text_rendering_setup(void);
+func uint text_render_to_texture(Texture* restrict output, string text, const Texture* restrict font, const uint* restrict colorData);
+func uint text_render(string text, const mat4 where, const Texture* restrict font);
+func uint text_render_ext(string text, const mat4 where, const Texture* restrict font, const uint* restrict colorData, u32 flags);
+func void text_size(string text, vec2u out, const Texture* restrict font);
 

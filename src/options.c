@@ -3,7 +3,7 @@
 
 internal const char* optionsFilePath = "./options.ini";
 
-void options_load(void) {
+func void options_load(void) {
 	// Use default values if some fields aren't present.
 	options_reset();
 	
@@ -105,7 +105,7 @@ void options_load(void) {
 	fclose(file);
 }
 
-void options_save(void) {
+func void options_save(void) {
 	FILE* file = fopen(optionsFilePath, "w");
 	
 	if (!file) {
@@ -123,7 +123,7 @@ void options_save(void) {
 	//fprintf(file, "renderer=%u\n", game.renderer);
 }
 
-void options_reset(void) {
+func void options_reset(void) {
 	game.window.width = 1280;
 	game.window.height = 720;
 	game.vsyncEnabled = true;

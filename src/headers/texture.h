@@ -29,7 +29,7 @@ enum {
 
 global Texture assets_textures[TEXTURE_COUNT];
 
-void texture_load_assets(void);
-void texture_free_assets(void);
-void texture_free(Texture* restrict texture);
+func void texture_load_assets(void);
+func void texture_free_assets(void);
+func void texture_free(Texture* restrict texture);
 

@@ -22,7 +22,7 @@ internal f32 textVertices[] = {
 	1.0f, 1.0f
 };
 
-void text_rendering_setup(void) {
+func void text_rendering_setup(void) {
 	textRendering.shader = shader_load("res/text");
 	if (!textRendering.shader) {
 		debug_error("Could not load text shader.\n");
@@ -74,7 +74,7 @@ void text_rendering_setup(void) {
 *
 * also, colorData can be NULL. Then all the text will be white.
 */
-uint text_render_to_texture(Texture* restrict output, string text, const Texture* restrict font, const uint* restrict colorData) {
+func uint text_render_to_texture(Texture* restrict output, string text, const Texture* restrict font, const uint* restrict colorData) {
 	
 	glBindBuffer(GL_ARRAY_BUFFER, textRendering.vbo);
 	glBindVertexArray(textRendering.vao);
@@ -172,11 +172,11 @@ uint text_render_to_texture(Texture* restrict output, string text, const Texture
 	return 0; // success
 }
 
-uint text_render(string text, const mat4 where, const Texture* restrict font) {
+func uint text_render(string text, const mat4 where, const Texture* restrict font) {
 	return text_render_ext(text, where, font, NULL, ALIGNMENT_NONE);
 }
 
-uint text_render_ext(string text, const mat4 where, const Texture* restrict font, const uint* restrict colorData, u32 flags) {
+func uint text_render_ext(string text, const mat4 where, const Texture* restrict font, const uint* restrict colorData, u32 flags) {
 	glBindBuffer(GL_ARRAY_BUFFER, textRendering.vbo);
 	glBindVertexArray(textRendering.vao);
 	
@@ -281,7 +281,7 @@ uint text_render_ext(string text, const mat4 where, const Texture* restrict font
 	return 0; // success
 }
 
-void text_size(string text, vec2u out, const Texture* restrict font) {
+func void text_size(string text, vec2u out, const Texture* restrict font) {
 	uint x = 0, y = 0;
 	uint xRecord = 0;
 	

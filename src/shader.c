@@ -4,7 +4,7 @@
 #include "headers/debug.h"
 #include "headers/global.h"
 
-Shader shader_load(const char* restrict name) {
+func Shader shader_load(const char* restrict name) {
 	char path[64];
 	char info[512];
 	char source[65536]; // 64KiB
@@ -80,21 +80,21 @@ Shader shader_load(const char* restrict name) {
 	return program;
 }
 
-Uniform shader_uniform(Shader shd, const char* name) {
+func Uniform shader_uniform(Shader shd, const char* name) {
 	return glGetUniformLocation(shd, name);
 }
 
-void shader_unload(Shader shd) {
+func void shader_unload(Shader shd) {
 	glDeleteProgram(shd);
 }
 
-void shader_bind(Shader shd) {
+func void shader_bind(Shader shd) {
 	assert(game.shaderStackSize < sizeof(game.shaderStack) / sizeof(*game.shaderStack));
 	game.shaderStack[game.shaderStackSize++] = shd;
 	glUseProgram(shd);
 }
 
-void shader_unbind(void) {
+func void shader_unbind(void) {
 	assert(game.shaderStackSize > 1);
 	glUseProgram(game.shaderStack[--game.shaderStackSize - 1]);
 }

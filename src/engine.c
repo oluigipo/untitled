@@ -27,7 +27,7 @@ internal void glfwcallback_error_handler(int code, const char* name) {
 	debug_error("GLFW Error %i: %s\n", code, name);
 }
 
-uint engine_init(const struct GameArgs* restrict args) {
+func uint engine_init(const struct GameArgs* restrict args) {
 	// Load options
 	options_load();
 	
@@ -152,7 +152,7 @@ uint engine_init(const struct GameArgs* restrict args) {
 	return 0;
 }
 
-void engine_begin_frame(void) {
+func void engine_begin_frame(void) {
 	game.frameBegin = glfwGetTime();
 	game.deltaTime = (game.frameBegin - game.lastFrame) * FPS_DEFAULT;
 	game.deltaTime = glm_min(game.deltaTime, 4.0f);
@@ -171,7 +171,7 @@ void engine_begin_frame(void) {
 	input_update();
 }
 
-void engine_end_frame(void) {
+func void engine_end_frame(void) {
 	sprite_batch_flush(NULL);
 	sprite_batch_done(NULL);
 	
@@ -233,7 +233,7 @@ void engine_end_frame(void) {
 	glfwSwapBuffers(game.apiWindow);
 }
 
-void engine_deinit(void) {
+func void engine_deinit(void) {
 	game.framebufferStackSize = 0;
 	framebuffer_deinit(&game.framebuffer);
 	options_save();

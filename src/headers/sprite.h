@@ -2,7 +2,7 @@
 #include "types.h"
 #include "texture.h"
 
-void sprite_rendering_init(void);
+func void sprite_rendering_init(void);
 
 struct Sprite {
 	Texture* texture;
@@ -16,9 +16,9 @@ struct SpriteRenderable {
 	vec2 size;
 } typedef SpriteRenderable;
 
-SpriteRenderable sprite_craft(const Sprite* base);
-void sprite_render(const Sprite* spr, const mat4 where);
-void sprite_render_ext(const Sprite* spr, const mat4 where, u32 blending, u32 frame, u32 flags);
+func SpriteRenderable sprite_craft(const Sprite* base);
+func void sprite_render(const Sprite* spr, const mat4 where);
+func void sprite_render_ext(const Sprite* spr, const mat4 where, u32 blending, u32 frame, u32 flags);
 
 struct SpriteBatchElement {
 	vec2 texcoords;
@@ -40,10 +40,10 @@ struct SpriteBatch {
 //
 //              The global sprite batch is flushed and done'd when 'engine_end_frame()'
 //              is called.
-void sprite_batch_init(SpriteBatch* batch, usize cap);
-void sprite_batch_reserve_more(SpriteBatch* batch, usize count);
-void sprite_batch_add(SpriteBatch* batch, const Sprite* spr, const mat4 where, u32 blending, u32 frame, u32 flags);
-void sprite_batch_flush(SpriteBatch* batch);
-void sprite_batch_render(const SpriteBatch* batch);
-void sprite_batch_done(SpriteBatch* batch);
+func void sprite_batch_init(SpriteBatch* batch, usize cap);
+func void sprite_batch_reserve_more(SpriteBatch* batch, usize count);
+func void sprite_batch_add(SpriteBatch* batch, const Sprite* spr, const mat4 where, u32 blending, u32 frame, u32 flags);
+func void sprite_batch_flush(SpriteBatch* batch);
+func void sprite_batch_render(const SpriteBatch* batch);
+func void sprite_batch_done(SpriteBatch* batch);
 

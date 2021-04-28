@@ -88,7 +88,7 @@ internal void discord_callback_on_current_user_updated(void* data) {
 	
 	discord.connected = true;
 	discord.user.id = user.id;
-	discord.user.username = (string) { .ptr = user.username, .len = strnlen(user.username, sizeof user.username) };
+	discord.user.username = (string) { .ptr = user.username, .len = strlen(user.username) };
 	discord.user.discriminator = simple_parse_uint(user.discriminator, 8);
 	
 	debug_log("User ID: %llu\nUsername: %.*s\nDiscriminator: %u\n", discord.user.id, strfmt(discord.user.username), discord.user.discriminator);
@@ -255,7 +255,8 @@ internal struct IDiscordActivityEvents activities_events = {
 };
 
 //- My Wrapper API
-b32 discord_init(void) {
+
+func b32 discord_init(void) {
 	struct DiscordCreateParams params;
     DiscordResult result;
 	
@@ -297,24 +298,24 @@ b32 discord_init(void) {
 	return true;
 }
 
-void discord_deinit(void) {
+func void discord_deinit(void) {
 	if (core) {
 		core->destroy(core);
 		core = NULL;
 	}
 }
 
-void discord_update(void) {
+func void discord_update(void) {
 	if (core)
 		core->run_callbacks(core);
 }
 
-void discord_late_update(void) {
+func void discord_late_update(void) {
 	if (core && lobbies)
 		lobbies->flush_network(lobbies);
 }
 
-void discord_update_activity(void) {
+func void discord_update_activity(void) {
 	if (discord.lobby.id != 0) {
 		discord.activity.party.size.current_size = discord.lobbynet.userCount;
 		discord.activity.party.size.max_size = discord.lobby.capacity;
@@ -330,7 +331,7 @@ void discord_update_activity(void) {
 	activities->update_activity(activities, &discord.activity, NULL, discord_callback_on_activity_update);
 }
 
-b32 discord_create_lobby(void) {
+func b32 discord_create_lobby(void) {
 	if (discord.lobby.id != 0) return false;
 	
 	struct IDiscordLobbyTransaction* transaction;
@@ -339,7 +340,7 @@ b32 discord_create_lobby(void) {
 	assert_result(lobbies->get_lobby_create_transaction(lobbies, &transaction));
 	
 	// set things
-	assert_result(transaction->set_capacity(transaction, 5));
+	assert_result(transaction->set_capacity(transaction, DISCORD_MAX_USERS));
 	assert_result(transaction->set_type(transaction, DiscordLobbyType_Private));
 	assert_result(transaction->set_metadata(transaction, "version", "100"));
 	
@@ -350,7 +351,7 @@ b32 discord_create_lobby(void) {
 	return true;
 }
 
-b32 discord_exit_lobby(void) {
+func b32 discord_exit_lobby(void) {
 	if (discord.lobby.id == 0) return false;
 	
 	if (!discord.lobbynet.host) {
@@ -374,7 +375,7 @@ b32 discord_exit_lobby(void) {
 	return true;
 }
 
-b32 discord_toggle_lobby_lock(void) {
+func b32 discord_toggle_lobby_lock(void) {
 	if (discord.lobby.id == 0) return false;
 	
 	struct IDiscordLobbyTransaction* transaction;
@@ -387,7 +388,7 @@ b32 discord_toggle_lobby_lock(void) {
 	return true;
 }
 
-b32 discord_send_buffer(Buffer buff, b32 reliable) {
+func b32 discord_send_buffer(Buffer buff, b32 reliable) {
 	if (discord.lobby.id == 0 || discord.joining) return false;
 	
 	reliable = !!reliable; // just to be safe
@@ -404,11 +405,11 @@ b32 discord_send_buffer(Buffer buff, b32 reliable) {
 	return true;
 }
 
-b32 discord_is_connected_to_lobby(void) {
+func b32 discord_is_connected_to_lobby(void) {
 	return discord.connected && discord.lobby.id != 0;
 }
 
-b32 discord_am_the_owner(void) {
+func b32 discord_am_the_owner(void) {
 	return discord_is_connected_to_lobby() && discord.lobbynet.host;
 }
 

@@ -7,13 +7,13 @@ internal struct SpriteRenderingStuff {
 
 internal SpriteBatch spriteGlobalBatch = { 0 };
 
-void sprite_rendering_init(void) {
+func void sprite_rendering_init(void) {
 	spriteRendering.shader = shader_load("res/sprite");
 	spriteRendering.uTexture = shader_uniform(spriteRendering.shader, "uTexture");
 }
 
 //~ Simple Sprites
-SpriteRenderable sprite_craft(const Sprite* base) {
+func SpriteRenderable sprite_craft(const Sprite* base) {
 	return (SpriteRenderable) {
 		.texture = base->texture,
 		.texcoords = {
@@ -27,11 +27,11 @@ SpriteRenderable sprite_craft(const Sprite* base) {
 	};
 }
 
-void sprite_render(const Sprite* spr, const mat4 where) {
+func void sprite_render(const Sprite* spr, const mat4 where) {
 	sprite_render_ext(spr, where, 0xFFFFFFFF, 0, ALIGNMENT_NONE);
 }
 
-void sprite_render_ext(const Sprite* spr_, const mat4 where, u32 blending, u32 frame, u32 flags) {
+func void sprite_render_ext(const Sprite* spr_, const mat4 where, u32 blending, u32 frame, u32 flags) {
 	uint vbo, vao;
 	uint quadVbo = shapes_quad();
 	
@@ -108,7 +108,7 @@ void sprite_render_ext(const Sprite* spr_, const mat4 where, u32 blending, u32 f
 }
 
 //~ Sprite Batching
-void sprite_batch_init(SpriteBatch* batch, usize cap) {
+func void sprite_batch_init(SpriteBatch* batch, usize cap) {
 	if (!batch)
 		batch = &spriteGlobalBatch;
 	
@@ -118,7 +118,7 @@ void sprite_batch_init(SpriteBatch* batch, usize cap) {
 	batch->elements = stack_alloc(&game.frameStack, sizeof(batch->elements[0]) * cap);
 }
 
-void sprite_batch_reserve_more(SpriteBatch* batch, usize count) {
+func void sprite_batch_reserve_more(SpriteBatch* batch, usize count) {
 	if (!batch)
 		batch = &spriteGlobalBatch;
 	
@@ -134,7 +134,7 @@ void sprite_batch_reserve_more(SpriteBatch* batch, usize count) {
 	batch->cap = newcap;
 }
 
-void sprite_batch_add(SpriteBatch* batch, const Sprite* spr_, const mat4 where, u32 blending, u32 frame, u32 flags) {
+func void sprite_batch_add(SpriteBatch* batch, const Sprite* spr_, const mat4 where, u32 blending, u32 frame, u32 flags) {
 	if (!batch)
 		batch = &spriteGlobalBatch;
 	
@@ -190,7 +190,7 @@ void sprite_batch_add(SpriteBatch* batch, const Sprite* spr_, const mat4 where, 
 	glm_mat4_mul(where, element->where, element->where);
 }
 
-void sprite_batch_flush(SpriteBatch* batch) {
+func void sprite_batch_flush(SpriteBatch* batch) {
 	if (!batch)
 		batch = &spriteGlobalBatch;
 	
@@ -201,7 +201,7 @@ void sprite_batch_flush(SpriteBatch* batch) {
 	batch->len = 0;
 }
 
-void sprite_batch_render(const SpriteBatch* batch) {
+func void sprite_batch_render(const SpriteBatch* batch) {
 	if (!batch)
 		batch = &spriteGlobalBatch;
 	
@@ -256,7 +256,7 @@ void sprite_batch_render(const SpriteBatch* batch) {
 	glDeleteVertexArrays(1, &vao);
 }
 
-void sprite_batch_done(SpriteBatch* batch) {
+func void sprite_batch_done(SpriteBatch* batch) {
 	if (!batch)
 		batch = &spriteGlobalBatch;
 	

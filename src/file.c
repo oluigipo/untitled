@@ -2,7 +2,7 @@
 #include "headers/memory.h"
 #include <stdio.h>
 
-usize file_read(const char* restrict fname, char* buffer, usize buffSize) {
+func usize file_read(const char* restrict fname, char* buffer, usize buffSize) {
 	FILE* file = fopen(fname, "r");
 	if (!file)
 		return 0;
@@ -14,7 +14,7 @@ usize file_read(const char* restrict fname, char* buffer, usize buffSize) {
 	return len;
 }
 
-usize file_dump(const char* restrict fname, char** restrict out) {
+func usize file_dump(const char* restrict fname, char** restrict out) {
 	FILE* file = fopen(fname, "r");
 	if (!file)
 		return 0;
@@ -37,7 +37,7 @@ usize file_dump(const char* restrict fname, char** restrict out) {
 	return len;
 }
 
-usize file_read_line(FILE* file, char* buffer, usize limit) {
+func usize file_read_line(FILE* file, char* buffer, usize limit) {
 	usize len = 0;
 	char c;
 	

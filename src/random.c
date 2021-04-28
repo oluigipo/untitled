@@ -9,7 +9,7 @@ internal inline u64 __rotl(const u64 x, int k) {
 }
 
 // Generates a random number between 0 and U64_MAX
-u64 random_u64(void) {
+func u64 random_u64(void) {
 	const u64 s0 = random_seed[0];
 	u64 s1 = random_seed[1];
 	const u64 result = __rotl(s0 + s1, 17) + s0;
@@ -21,7 +21,7 @@ u64 random_u64(void) {
 	return result;
 }
 
-void random_init(void) {
+func void random_init(void) {
 	static const u64 JUMP[] = { 0xdf900294d8f554a5, 0x170865df4b3201fc };
 	
 	random_seed[0] = time(NULL);
@@ -45,18 +45,18 @@ void random_init(void) {
 }
 
 // Generates a random number between 0 and 1
-f64 random_f64(void) {
+func f64 random_f64(void) {
 	return (f64)random_u64() / (f64)U64_MAX;
 }
 
 // 32 bits version of random()
-u32 random_u32(void) {
+func u32 random_u32(void) {
 	u64 result = random_u64();
 	return (u32)(result >> 32); // the higher bits are more random.
 }
 
 // Test the randomness of random_f64()
-void random_test(void) {
+func void random_test(void) {
 	FILE* file = fopen("random_test.ppm", "w");
 	if (!file)
 		return;

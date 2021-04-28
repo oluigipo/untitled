@@ -7,6 +7,7 @@
 #define false 0
 #define internal static
 #define global extern
+#define func static
 
 #define restrict
 #undef restrict

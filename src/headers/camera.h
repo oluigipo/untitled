@@ -9,7 +9,7 @@ struct Camera {
 	f32 speed;
 };
 
-void camera_update(struct Camera* restrict camera);
-void camera_matrix(struct Camera* restrict cam, mat4 out);
-void camera_mouse_pos(struct Camera* restrict cam, vec2 out);
+func void camera_update(struct Camera* restrict camera);
+func void camera_matrix(struct Camera* restrict cam, mat4 out);
+func void camera_mouse_pos(struct Camera* restrict cam, vec2 out);
 

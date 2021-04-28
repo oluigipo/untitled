@@ -8,7 +8,7 @@
 internal ALCdevice* soundDevice;
 internal ALCcontext* soundContext;
 
-void sound_init(void) {
+func void sound_init(void) {
 	soundDevice = alcOpenDevice(NULL);
 	if (!soundDevice) {
 		debug_error("Could not open an OpenAL Device. Program will continue without sound.\n");
@@ -33,17 +33,17 @@ void sound_init(void) {
 	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
 }
 
-void sound_deinit(void) {
+func void sound_deinit(void) {
 	alcDestroyContext(soundContext);
 	alcCloseDevice(soundDevice);
 }
 
-void sound_listener_position(const vec3 pos) {
+func void sound_listener_position(const vec3 pos) {
 	alListener3f(AL_POSITION, pos[0], pos[1], pos[2]);
 }
 
 //~ Loading Sounds
-uint sound_load_file(const char* fname) {
+func uint sound_load_file(const char* fname) {
 	int channels, sampleRate;
 	i16* data;
 	int sampleCount = stb_vorbis_decode_filename(fname, &channels, &sampleRate, &data);
@@ -78,34 +78,34 @@ uint sound_load_file(const char* fname) {
 	return bufferId;
 }
 
-void sound_unload(uint buffer) {
+func void sound_unload(uint buffer) {
 	alDeleteBuffers(1, &buffer);
 }
 
 //~ Playing Sounds
-void sound_play_source(uint source) {
+func void sound_play_source(uint source) {
 	alSourcePlay(source);
 }
 
-void sound_play_source_at(uint source, f32 sampleCount) {
+func void sound_play_source_at(uint source, f32 sampleCount) {
 	alSourcef(source, AL_SAMPLE_OFFSET, sampleCount);
 	alSourcePlay(source);
 }
 
-void sound_stop_source(uint source) {
+func void sound_stop_source(uint source) {
 	alSourceStop(source);
 }
 
-void sound_pause_source(uint source) {
+func void sound_pause_source(uint source) {
 	alSourcePause(source);
 }
 
-void sound_rewind_source(uint source) {
+func void sound_rewind_source(uint source) {
 	alSourceRewind(source);
 }
 
 //~ Sources
-uint sound_make_source(void) {
+func uint sound_make_source(void) {
 	uint source;
 	alGenSources(1, &source);
 	alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
@@ -116,37 +116,37 @@ uint sound_make_source(void) {
 	return source;
 }
 
-void sound_delete_source(uint source) {
+func void sound_delete_source(uint source) {
 	alDeleteSources(1, &source);
 }
 
-void sound_source_position(uint source, const vec3 pos) {
+func void sound_source_position(uint source, const vec3 pos) {
 	alSource3f(source, AL_POSITION, pos[0], pos[1], pos[2]);
 }
 
-void sound_source_params(uint source, f32 gain, f32 pitch) {
+func void sound_source_params(uint source, f32 gain, f32 pitch) {
 	alSourcef(source, AL_GAIN, gain);
 	alSourcef(source, AL_PITCH, pitch);
 }
 
-void sound_source_attenuation(uint source, f32 rolloff, f32 refDistance, f32 maxDistance) {
+func void sound_source_attenuation(uint source, f32 rolloff, f32 refDistance, f32 maxDistance) {
 	alSourcef(source, AL_ROLLOFF_FACTOR, rolloff);
 	alSourcef(source, AL_REFERENCE_DISTANCE, refDistance);
 	alSourcef(source, AL_MAX_DISTANCE, maxDistance);
 }
 
-void sound_source_buffer(uint source, uint buffer) {
+func void sound_source_buffer(uint source, uint buffer) {
 	alSourcei(source, AL_BUFFER, buffer);
 }
 
-f32 sound_source_at(uint source) {
+func f32 sound_source_at(uint source) {
 	f32 result;
 	alGetSourcef(source, AL_SAMPLE_OFFSET, &result);
 	return result;
 }
 
 //~ Sound Error
-void sound_error(void) {
+func void sound_error(void) {
 	ALenum err = alGetError();
     if (err != AL_NO_ERROR) {
         debug_error("OpenAL Error: %s\n", alGetString(err));

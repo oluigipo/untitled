@@ -1,7 +1,7 @@
 #pragma once
+#include <glad/glad.h>
 
 #include "types.h"
-#include <glad/glad.h>
 #include <glfw3.h>
 #include <cglm/cglm.h>
 #include <cglm/vec4.h>

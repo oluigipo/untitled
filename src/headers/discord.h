@@ -3,7 +3,7 @@
 #include "buffer.h"
 #include <discord_game_sdk.h>
 
-#define DISCORD_MAX_USERS 6
+#define DISCORD_MAX_USERS 4
 
 //- Basics
 struct DiscordClientUser {
@@ -32,16 +32,16 @@ global struct DiscordGlobalStuff {
 } discord;
 
 //- API
-b32 discord_init(void);
-void discord_update(void);
-void discord_late_update(void);
-void discord_deinit(void);
-void discord_update_activity(void);
+func b32 discord_init(void);
+func void discord_update(void);
+func void discord_late_update(void);
+func void discord_deinit(void);
+func void discord_update_activity(void);
 
 // Lobby things
-b32 discord_create_lobby(void);
-b32 discord_exit_lobby(void);
-b32 discord_send_buffer(Buffer buff, b32 reliable);
-b32 discord_toggle_lobby_lock(void);
-b32 discord_is_connected_to_lobby(void);
-b32 discord_am_the_owner(void);
+func b32 discord_create_lobby(void);
+func b32 discord_exit_lobby(void);
+func b32 discord_send_buffer(Buffer buff, b32 reliable);
+func b32 discord_toggle_lobby_lock(void);
+func b32 discord_is_connected_to_lobby(void);
+func b32 discord_am_the_owner(void);

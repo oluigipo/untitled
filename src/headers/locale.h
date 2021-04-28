@@ -14,6 +14,6 @@ global string** locales;
 global uint localeCount;
 global uint currentLocale;
 
-void locale_init(void);
-void locale_deinit(void);
-void locale_reload(void);
+func void locale_init(void);
+func void locale_deinit(void);
+func void locale_reload(void);

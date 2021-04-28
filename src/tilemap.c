@@ -1,6 +1,6 @@
 #include "headers/all.h"
 
-void tilemap_render(const struct Tilemap* tilemap, const mat4 where) {
+func void tilemap_render(const struct Tilemap* tilemap, const mat4 where) {
 	static Shader shader;
 	static Uniform uMatrix;
 	static Uniform uSize;

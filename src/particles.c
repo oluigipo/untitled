@@ -6,7 +6,7 @@ u32 index = mgr->field.count < MAX_PARTICLE_COUNT ? mgr->field.count++ : (random
 mgr->field.data[index] = partData ? *(T*)partData : (T) { 0 };\
 } while (0)
 
-void partmgr_add(ParticleManager* mgr, ParticleKind kind, void* partData) {
+func void partmgr_add(ParticleManager* mgr, ParticleKind kind, void* partData) {
 	switch (kind) {
 		case PART_SIMPLE: partmgr_add_template(struct PartSimple, simple); break;
 		default: debug_error("Unknown 'enum ParticleKind' entry %i.\n", kind); break;
@@ -22,7 +22,7 @@ mgr->field.data[i] = mgr->field.data[mgr->field.count];\
 notdeleted = false;\
 } while (0)
 
-void partmgr_update(ParticleManager* mgr) {
+func void partmgr_update(ParticleManager* mgr) {
 	b32 notdeleted = true;
 	
 	// PART_SIMPLE
@@ -58,7 +58,7 @@ internal struct ParticleManagerRenderingData {
 	Uniform colors;
 } partmgrRenderingData;
 
-void partmgr_setup_rendering(void) {
+func void partmgr_setup_rendering(void) {
 	// Just a simple quad. TexCoords are calculated using 'vec2(position.x, 1.0 - position.y)'.
 	f32 vertices[] = {
 		// position
@@ -89,7 +89,7 @@ void partmgr_setup_rendering(void) {
 	partmgrRenderingData.colors = shader_uniform(shader, "uColors");
 }
 
-void partmgr_render(ParticleManager* mgr, mat4 view) {
+func void partmgr_render(ParticleManager* mgr, mat4 view) {
 	glBindVertexArray(partmgrRenderingData.vao);
 	
 	shader_bind(partmgrRenderingData.shader);

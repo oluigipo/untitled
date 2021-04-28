@@ -9,5 +9,7 @@
 
 #endif
 
-uint scene_main(void);
+func uint scene_main(void);
+func uint scene_menu(void);
+func uint scene_game(void);
 

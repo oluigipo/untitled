@@ -19,7 +19,7 @@ internal unsigned char* str_jump_to(unsigned char* str, unsigned char ch) {
 	return strchr(str, '\0');
 }
 
-void locale_init(void) {
+func void locale_init(void) {
 	DIR* dir = opendir("locale");
 	
 	if (!dir) {
@@ -99,7 +99,7 @@ void locale_init(void) {
 	localeCount = localesList.len;
 }
 
-void locale_deinit(void) {
+func void locale_deinit(void) {
 	strbuf_free(localesBuffer);
 	
 	for (uint i = 0; i < localeCount; ++i)
@@ -111,7 +111,7 @@ void locale_deinit(void) {
 	localesBuffer = NULL;
 }
 
-void locale_reload(void) {
+func void locale_reload(void) {
 	locale_deinit();
 	locale_init();
 }

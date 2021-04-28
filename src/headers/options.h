@@ -1,7 +1,7 @@
 #pragma once
 #include "types.h"
 
-void options_load(void);
-void options_save(void);
-void options_reset(void);
+func void options_load(void);
+func void options_save(void);
+func void options_reset(void);
 

@@ -1,4 +1,4 @@
 #pragma once
 #include "types.h"
 
-uint shapes_quad(void);
+func uint shapes_quad(void);

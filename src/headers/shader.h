@@ -4,9 +4,9 @@
 typedef uint Shader;
 typedef uint Uniform;
 
-Shader shader_load(const char* restrict name);
-Shader shader_uniform(Shader shd, const char* name);
-void shader_unload(Shader shd);
-void shader_bind(Shader shd);
-void shader_unbind(void);
+func Shader shader_load(const char* restrict name);
+func Shader shader_uniform(Shader shd, const char* name);
+func void shader_unload(Shader shd);
+func void shader_bind(Shader shd);
+func void shader_unbind(void);
 

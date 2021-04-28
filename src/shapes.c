@@ -1,7 +1,7 @@
 #include "headers/shapes.h"
 #include "headers/opengl.h"
 
-uint shapes_quad(void) {
+func uint shapes_quad(void) {
 	static uint vbo = 0;
 	
 	if (!vbo) {

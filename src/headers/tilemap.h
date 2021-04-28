@@ -8,5 +8,5 @@ struct Tilemap {
 	u16* data;
 };
 
-void tilemap_render(const struct Tilemap* tilemap, const mat4 where);
+func void tilemap_render(const struct Tilemap* tilemap, const mat4 where);
 
